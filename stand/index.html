@@ -2,37 +2,54 @@
 <html lang="es" data-theme="dark">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>gen+ · Agente del stand — vista previa v5.0</title>
+<title>Genbot · Edge Voice Agent · gen+</title>
+<script>
+  (function(){
+    var saved = localStorage.getItem('genbot-theme');
+    var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = saved || (systemDark ? 'dark' : 'light');
+  })();
+</script>
 
 <style>
   /* ── Plus Jakarta Sans local (el stand es offline: nada de Google Fonts) ───── */
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Medium.woff2") format("woff2");font-weight:500;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:swap}
+
+  @property --brand-hue{syntax:"<number>";inherits:true;initial-value:260}
 
   /* ── Tokens GEN+ Design System (DESIGN.md §11, tema DARK consolidado) ────────
      17-jul: se funden aquí el bloque light original y el parche dark del 16-jul
      (pedido de Emanuel). Una sola fuente de verdad; un solo lienzo navy. */
   :root{
+    --brand-hue:260;
     --font-jakarta:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
     --font-mono:Menlo,Consolas,ui-monospace,monospace;
 
     /* Rampa azul de marca (DESIGN.md §4). pale/medium/ice retonados para navy. */
-    --blue-primary:#2165FF; --blue-bright:#1E5CE8; --blue-light:#4D84FF; --blue-sky:#6A98FF;
-    --blue-deep-navy:#0E2A6B; --blue-dark:#12388C;
-    --blue-pale:#8FB0FF; --blue-medium:#9DB9FF; --blue-ice:rgba(77,132,255,.14);
+    --blue-primary:oklch(62% .245 var(--brand-hue));
+    --blue-bright:oklch(59% .22 var(--brand-hue));
+    --blue-light:oklch(68% .19 var(--brand-hue));
+    --blue-sky:oklch(75% .14 var(--brand-hue));
+    --blue-deep-navy:oklch(31% .12 var(--brand-hue));
+    --blue-dark:oklch(39% .15 var(--brand-hue));
+    --blue-pale:oklch(78% .12 var(--brand-hue));
+    --blue-medium:oklch(81% .1 var(--brand-hue));
+    --blue-ice:oklch(68% .19 var(--brand-hue) / .14);
 
     --background:#040F20; --surface:#06142A; --surface-subtle:#0A1D3D; --surface-raised:#0A244C;
     --border:rgba(122,168,255,.15); --border-strong:rgba(122,168,255,.34);
     --text-primary:#EAF0FF; --text-secondary:#B9C7E4; --text-muted:#7E93BC;
-    --primary:#2165FF; --primary-hover:#1E5CE8; --focus-ring:rgba(109,149,255,.4);
-    --success:#19C356; --warning:#EED611; --danger:#EE1211;
+    --primary:var(--blue-primary);--primary-hover:var(--blue-bright);
+    --focus-ring:oklch(74% .14 var(--brand-hue) / .42);
+    --success:oklch(70% .2 148);--warning:oklch(88% .18 101);--danger:oklch(63% .24 28);
 
     /* Marca: gradiente oficial (DESIGN.md §4) + CTA + glow sobrio */
-    --gradient-brand:linear-gradient(165deg,#0E2A6B 0%,#12388C 20%,#1748B5 40%,#1E5CE8 60%,#2165FF 80%,#4D84FF 100%);
-    --gradient-cta:linear-gradient(135deg,#1E5CE8 0%,#4D84FF 100%);
+    --gradient-brand:linear-gradient(165deg,var(--blue-deep-navy),var(--blue-dark) 32%,var(--blue-bright) 68%,var(--blue-light));
+    --gradient-cta:linear-gradient(135deg,var(--blue-bright),var(--blue-light));
     --glow-primary:0 0 24px rgba(59,110,255,.32);
 
     /* Escenario del orbe: la mezcla aditiva de las particulas pide navy profundo. */
@@ -42,6 +59,19 @@
     --radius-xs:4px; --radius-sm:8px; --radius-md:10px; --radius-lg:12px; --radius-xl:16px; --radius-full:999px;
     --shadow-sm:0 2px 8px rgba(0,0,0,.35);
     --shadow-md:0 12px 28px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+  html[data-theme="light"]{
+    --background:#F4F7FC;--surface:#FFFFFF;--surface-subtle:#EDF3FF;--surface-raised:#E4ECFA;
+    --border:rgba(14,42,107,.13);--border-strong:rgba(14,42,107,.26);
+    --text-primary:#081A36;--text-secondary:#344765;--text-muted:#687A94;
+    --blue-pale:oklch(57% .16 var(--brand-hue));--blue-medium:oklch(52% .19 var(--brand-hue));
+    --blue-ice:oklch(62% .245 var(--brand-hue) / .09);
+    --shadow-sm:0 2px 8px rgba(14,42,107,.08);--shadow-md:0 16px 36px rgba(14,42,107,.14);
+    color-scheme:light;
+  }
+  html.theme-transition-off *,html.theme-transition-off *::before,html.theme-transition-off *::after{
+    transition:none!important;animation-duration:0s!important
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -65,6 +95,8 @@
     backdrop-filter:blur(18px) saturate(1.3);
     -webkit-backdrop-filter:blur(18px) saturate(1.3);
   }
+  html[data-theme="light"] header{background:rgba(255,255,255,.82)}
+  html[data-theme="light"] .brand img{filter:brightness(0) saturate(100%) invert(16%) sepia(78%) saturate(1890%) hue-rotate(210deg)}
   /* Hairline de marca bajo el header: la firma visual gen+ sin gritar */
   header::after{
     content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
@@ -95,7 +127,7 @@
   .chip b{color:var(--text-primary);font-weight:600}
   .mic-btn{cursor:pointer;font-family:var(--font-jakarta);color:var(--blue-medium);
            border-color:var(--blue-pale);background:var(--blue-ice)}
-  .mic-btn:hover{background:#dbe7ff}
+  .mic-btn:hover{background:var(--surface-raised)}
 
   /* ── Panel de micrófono ─────────────────────────────────────────────────────── */
   .mic-panel{position:fixed;top:64px;right:16px;z-index:50;width:360px;background:var(--surface);
@@ -124,8 +156,8 @@
   .mic-res.show{display:block}
   .mic-res .lvl{height:6px;border-radius:99px;background:var(--border);overflow:hidden;margin:7px 0 3px}
   .mic-res .lvl i{display:block;height:100%;background:var(--blue-primary);width:0%;transition:width .3s ease}
-  .mic-res.ok{border-color:#A8E6C1;background:var(--okB, #E6F9EE)}
-  .mic-res.ok b{color:#0B7A34}
+  .mic-res.ok{border-color:color-mix(in oklch,var(--success),transparent 45%);background:color-mix(in oklch,var(--success),var(--surface) 90%)}
+  .mic-res.ok b{color:var(--success)}
 
   /* ── Panel Sistema (desplegable): la telemetría vive aquí, no a la vista ───── */
   .sys-panel{position:fixed;top:64px;right:16px;z-index:50;width:420px;background:var(--surface);
@@ -319,14 +351,15 @@
   <header>
     <div class="brand">
       <img src="static/gen-logo-white.png" alt="gen+">
-      <span class="ver">v5.0</span>
-      <span class="net"><span class="led"></span>100% LOCAL</span>
+      <span class="ver">v6.0</span>
+      <span class="net"><span class="led"></span>VISTA PREVIA</span>
     </div>
     <div class="chips" id="chips">
       <button class="chip kbtn" id="btn-sys" title="Estado del sistema">
         <span class="led" id="sys-led"></span>Sistema
       </button>
       <button class="chip kbtn" id="btn-full" title="Pantalla completa (modo stand)">⛶</button>
+      <button class="chip kbtn" id="btn-theme" type="button" title="Cambiar tema" aria-label="Cambiar tema"><span aria-hidden="true">◐</span><span class="theme-label">Tema</span></button>
       <button class="chip kbtn" id="btn-limpiar" title="Limpiar pantalla entre visitantes">Limpiar</button>
       <button class="chip mic-btn" id="btn-mic" title="Configurar micrófono">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
@@ -464,6 +497,8 @@
             <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
             <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
             <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz con ranking</button>
+            <button class="gen-button btn-ej" data-cool="12000" data-t="consulta en Agent Flow mi agenda de hoy">Consultar AgentFlow</button>
+            <button class="gen-button btn-ej" data-t="abre la calculadora">Controlar la PC</button>
             <button class="gen-button btn-ej" data-cool="20000"
                     data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
               Enviar un correo</button>
@@ -523,7 +558,7 @@
           </div>
 
           <div class="soon-h"><span>En el catálogo · aún no en vivo</span><span class="ln"></span></div>
-          <div class="row"><span class="dot"></span><span class="rn">Aecodito · Centro de Operaciones</span><span class="rs">74 nodos</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Genbot · Centro de Operaciones</span><span class="rs">AgentFlow</span></div>
           <div class="row"><span class="dot"></span><span class="rn">Buscador SEACE</span><span class="rs">licitaciones</span></div>
           <div class="row"><span class="dot"></span><span class="rn">Agente Inmobiliario</span><span class="rs">WhatsApp v1.1</span></div>
           <div class="row"><span class="dot"></span><span class="rn">Ventas Summit VIP</span><span class="rs">gen-flows</span></div>
@@ -824,7 +859,9 @@
     $('c-stt').querySelector('b').textContent = i.stt_device;
     $('c-llm').querySelector('b').textContent = i.brain;
     $('c-tts').querySelector('b').textContent = i.tts_chip || 'Piper';
-    $('c-flow').querySelector('b').textContent = i.agentflow_host.split(':')[0];
+    $('c-flow').querySelector('b').textContent = (i.agentflow_host || 'sin gateway').split(':')[0];
+    $('c-flow').classList.toggle('up', !!i.agentflow_agent);
+    $('c-flow').classList.toggle('down', !i.agentflow_agent);
     ['c-stt','c-llm','c-tts'].forEach(c => $(c).classList.add('up'));  // locales: si corre, están
   }).catch(() => {});
 
@@ -854,7 +891,7 @@
     const e = box.querySelector('.empty'); if (e) e.remove();
     const d = document.createElement('div');
     d.className = 'tr ' + quien;
-    d.innerHTML = '<span class="q">' + (quien === 'u' ? 'VISITANTE' : 'AECODITO') + ' · ' + hora() + '</span>'
+    d.innerHTML = '<span class="q">' + (quien === 'u' ? 'VISITANTE' : 'GENBOT') + ' · ' + hora() + '</span>'
                 + esc(texto);
     box.prepend(d);
     while (box.children.length > 20) box.lastChild.remove();  // en feria esto crece toda la tarde
@@ -1099,6 +1136,27 @@
           clearTimeout(window.__gemmaHide);
           window.__gemmaHide = setTimeout(() => c.classList.remove('open'), 12000);
         }
+      }
+      if (m.type === 'agentflow'){
+        if (m.phase === 'start'){
+          pipeOn('flow');
+          window.__afCard = addExec('<div class="top"><span class="who">Genbot · AgentFlow</span><span class="t">' + hora() + '</span></div>'
+            + '<div class="subj">Centro de Operaciones · memoria + herramientas</div><div class="st wait js-af">· consultando…</div>');
+        } else {
+          const st = window.__afCard && window.__afCard.querySelector('.js-af');
+          if (st){
+            st.className = 'st ' + (m.phase === 'done' ? 'ok' : 'bad');
+            st.textContent = m.phase === 'done' ? ('✓ respuesta recibida' + (m.run_id ? ' · run ' + m.run_id.slice(0,8) : ''))
+              : ('✕ ' + (m.error || 'gateway no disponible'));
+          }
+          $('c-flow').classList.toggle('up', m.phase === 'done');
+          $('c-flow').classList.toggle('down', m.phase !== 'done');
+        }
+      }
+      if (m.type === 'pc_action'){
+        addExec('<div class="top"><span class="who">Genbot · PC local</span><span class="t">' + hora() + '</span></div>'
+          + '<div class="subj">' + esc(m.action || 'acción') + '</div><div class="st ' + (m.ok ? 'ok' : 'bad') + '">'
+          + (m.ok ? '✓ ejecutada desde la lista permitida' : '✕ no ejecutada') + '</div>');
       }
       if (m.type === 'exec'){
         pipeOn('flow');
@@ -1426,7 +1484,7 @@
   }
 
   // ── Deck por gestos: iframe bajo demanda (MediaPipe vendorizado, 100% local) ──
-  const GESTOS_APPS = { ciudad: '/static/ciudad/index.html', ainy: '/static/ainy/index.html' };
+  const GESTOS_APPS = { ciudad: 'static/ciudad/index.html', ainy: 'static/ainy/index.html' };
   function gestosOn(app){
     window.__twinApp = GESTOS_APPS[app] ? app : 'ciudad';
     const src = GESTOS_APPS[app] || GESTOS_APPS.ciudad;
@@ -1712,8 +1770,43 @@
   .badge.on{box-shadow:0 0 12px rgba(33,101,255,.28);animation:badgeGlow 3.2s ease-in-out infinite}
   @keyframes badgeGlow{50%{box-shadow:0 0 18px rgba(33,101,255,.45)}}
 
+  button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+    outline:2px solid var(--blue-light);outline-offset:3px
+  }
+  html[data-theme="light"] .rail{background:var(--surface)}
+  html[data-theme="light"] #rail-tgl{background:rgba(255,255,255,.9)}
+  html[data-theme="light"] .mic-btn:hover{background:var(--surface-raised)}
+
+  @media (max-width:900px){
+    body{height:auto;min-height:100svh;overflow:auto}
+    .app{height:auto;min-height:100svh;grid-template-rows:auto 1fr}
+    header{min-height:64px;padding:10px 14px;gap:10px;flex-wrap:wrap}
+    .chips{gap:6px;max-width:100%;overflow-x:auto;padding-bottom:2px}
+    main,body.rail-off main{display:block}
+    .stage{min-height:calc(100svh - 64px);padding:54px 14px 22px;overflow:hidden}
+    canvas#orb{width:min(76vw,430px);height:min(76vw,430px)}
+    .ejemplos{max-width:100%;overflow-x:auto;justify-content:flex-start}
+    .ej-tabs{min-width:max-content}
+    .rail{border-left:0;border-top:1px solid var(--border);max-height:none;overflow:visible}
+    .rail section:first-of-type .scroll{max-height:none}
+    #rail-tgl{display:none}
+    .sys-panel,.mic-panel{top:72px;left:12px;right:12px;width:auto;max-height:78svh;overflow:auto}
+  }
+  @media (max-width:600px){
+    .brand{gap:8px}.brand .net,.theme-label{display:none}.brand img{height:19px}
+    header .chip{min-width:44px;min-height:44px;justify-content:center;padding:0 10px}
+    #btn-limpiar{font-size:0}#btn-limpiar::after{content:'↻';font-size:18px}
+    .stage{gap:12px}.estado{top:14px;left:14px}
+    .caption{padding:0 8px}.agent{font-size:17px;line-height:24px}
+    .btn-hablar{min-height:52px;min-width:170px}
+    .ej-tab,.btn-ej,.btn-app{min-height:44px}
+    .pipe{max-width:100%;overflow-x:auto;justify-content:flex-start;padding-bottom:4px}
+    #derivas-card,#norma-card,#gemma-card,#clima-card{max-width:calc(100vw - 24px);min-width:0}
+  }
+
   @media (prefers-reduced-motion:reduce){
-    .orb-ring,.orb-halo,.orb-pulse,.scan::before,header::after,.badge.on{animation:none !important}
+    *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;
+      animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
 </style>
 <script>
@@ -1730,6 +1823,24 @@
     });
     var tgl = document.getElementById('rail-tgl');
     if (tgl) tgl.onclick = function () { document.body.classList.toggle('rail-off'); };
+    var themeBtn = document.getElementById('btn-theme');
+    function themeLabel(){
+      if (!themeBtn) return;
+      var next = document.documentElement.dataset.theme === 'dark' ? 'claro' : 'oscuro';
+      themeBtn.setAttribute('aria-label','Cambiar a tema ' + next);
+      themeBtn.title = 'Cambiar a tema ' + next;
+    }
+    themeLabel();
+    if (themeBtn) themeBtn.onclick = function () {
+      document.documentElement.classList.add('theme-transition-off');
+      var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('genbot-theme', next);
+      themeLabel();
+      requestAnimationFrame(function(){requestAnimationFrame(function(){
+        document.documentElement.classList.remove('theme-transition-off');
+      });});
+    };
   })();
 </script>
 </html>

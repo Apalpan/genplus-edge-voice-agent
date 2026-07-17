@@ -2,7 +2,7 @@
    Reemplaza el backend real (FastAPI + WebSocket) por un bus simulado que habla
    el MISMO contrato de eventos que el orquestador. La UI (index.html) no se toca:
    cree estar conectada al agente del stand. En el evento, el sistema completo
-   corre 100% offline en el equipo físico (Whisper + Gemma + Piper locales).      */
+   corre local-first en el equipo físico (Whisper + Gemma 4 + Piper locales).    */
 (function () {
   "use strict";
 
@@ -71,6 +71,18 @@
     await userTurn(text);
     const t = norm(text);
 
+    if (/agent ?flow|agenda|centro de operaciones|publicidad/.test(t)) {
+      emit("agentflow", { phase: "start", agent: "Genbot Voice Gateway" }, "thinking");
+      await sleep(900);
+      emit("metric", { stage: "flow", ms: 870 });
+      emit("agentflow", { phase: "done", agent: "operations", run_id: "preview" }, "speaking");
+      return agentSay("Genbot puede consultar calendario, reuniones, contactos y reportes mediante AgentFlow. Esta página lo simula; la ejecución real corre desde la computadora autorizada.");
+    }
+    if (/controla.*pc|controlar.*pc|abre.*calculadora|computadora/.test(t)) {
+      emit("pc_action", { ok: true, action: "vista previa" }, "executing");
+      return agentSay("En la aplicación local puedo abrir aplicaciones aprobadas y controlar el volumen. Esta vista web no recibe permisos sobre tu computadora.");
+    }
+
     if (/correo|email|informe.*correo|env[ií]a/.test(t) && !/informe del edificio/.test(t)) {
       emit("email_prompt", {}, "waiting");
       await agentSay("Con gusto. Escribe tu correo en la pantalla, ahí mismo te llega.", "waiting");
@@ -83,7 +95,7 @@
     }
     if (/internet|conectado/.test(t)) {
       emit("metric", { stage: "router", ms: 2 });
-      return agentSay("Casi todo corre local, aquí en el equipo del stand: la voz, el cerebro y la norma. Solo el correo sale a internet, por Agent Flow.");
+      return agentSay("Whisper y Gemma 4 corren localmente. AgentFlow se usa solo cuando Genbot necesita consultar servicios y agentes remotos.");
     }
     if (/foto/.test(t)) {
       await agentSay("¡Sonríe! Tres, dos, uno.", "executing");
@@ -133,7 +145,9 @@
       return agentSay("La detección de cascos y chalecos corre con nuestra cámara en el stand físico, con el modelo de obra de Vision Pro. Ven a probarla en vivo.");
     }
     if (/ciudad|ainy|gemelo/.test(t)) {
-      return agentSay("Los gemelos tres D se navegan con gestos frente a la cámara del stand. En esta vista previa te los debo; en el evento los manejas con la mano.");
+      const app = /ainy/.test(t) ? "ainy" : "ciudad";
+      emit("gestos", { on: true, app }, "executing");
+      return agentSay("Abro el gemelo tres D. En la aplicación local también puedes navegarlo por voz y gestos frente a la cámara.");
     }
     if (/desintegra/.test(t)) {
       emit("orb_fx", { fx: "disintegrate" }, "executing");
@@ -146,11 +160,11 @@
       return agentSay("¿Qué tal este?");
     }
     if (/hola|quien eres/.test(t)) {
-      return agentSay("Hola, soy el agente de voz de gen+. Corro completo en este equipo, sin nube. Pregúntame por la norma, pídeme un edificio o juega el quiz.");
+      return agentSay("Hola, soy Genbot, el agente de voz de gen+. Escucho con Whisper, razono con Gemma 4 y conecto herramientas mediante AgentFlow.");
     }
     if (/adios|chau|gracias/.test(t)) return agentSay("¡Gracias por visitarnos! Pasa por el stand de gen+ y llévate tu diagnóstico.");
     emit("metric", { stage: "llm", ms: 900 + Math.round(Math.random() * 600) });
-    return agentSay("Buena pregunta. En el stand la respondo con Gemma corriendo en la tarjeta gráfica de este equipo. Esta es la vista previa web: ven a conversar con el sistema completo.");
+    return agentSay("Buena pregunta. En la aplicación real la respondo con Gemma 4 en la tarjeta gráfica de esta computadora. Esta es una vista previa segura del sistema completo.");
   }
 
   /* ── quiz con ranking (flujo completo, interactivo) ──────────────────────── */
@@ -178,11 +192,12 @@
   /* ── WebSocket falso (mismo contrato que ui/server.py) ───────────────────── */
   class FakeWS {
     constructor() {
+      this.readyState = 1;
       sockets.push(this);
       setTimeout(() => {
         if (this.onopen) this.onopen();
         emit("status", {}, "idle");
-        setTimeout(() => agentSay("Hola, soy el agente de voz de gen+. Esta es la vista previa web: tócame un ejemplo."), 1400);
+        setTimeout(() => agentSay("Hola, soy Genbot. Esta es la vista previa web: toca un ejemplo para probar el flujo."), 1400);
         armIdle();
       }, 300);
     }
@@ -221,8 +236,9 @@
         emit("player_prompt_close", {}, "idle");
       }
     }
-    close() { sockets = sockets.filter((w) => w !== this); }
+    close() { this.readyState = 3; sockets = sockets.filter((w) => w !== this); }
   }
+  FakeWS.OPEN = 1;
   window.WebSocket = FakeWS;
 
   /* ── modo atracción (como el real: cada rato invita solo) ────────────────── */
@@ -240,7 +256,7 @@
   window.fetch = function (url, opts) {
     const u = String(url);
     const json = (obj) => Promise.resolve(new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } }));
-    if (u.includes("/api/info")) return json({ stt: "faster-whisper small", stt_device: "CUDA", brain: "gemma3:4b", tts: "Iapetus 97/97 + Piper", tts_chip: "Iapetus", agentflow_host: "gen-flows", to: "coordinación gen+" });
+    if (u.includes("/api/info")) return json({ assistant: "Genbot", stt: "faster-whisper small", stt_device: "CUDA", brain: "gemma4:latest", tts: "Iapetus + Piper", tts_chip: "Iapetus", agentflow_host: "AgentFlow", agentflow_agent: true, to: "coordinación gen+" });
     if (u.includes("/api/stats")) return json(stats);
     if (u.includes("/api/salud")) return json({ ram_libre_gb: 9.4, ram_total_gb: 32 });
     if (u.includes("/api/mics")) return json({ mics: [{ id: 0, name: "Micrófono del stand (demo)", api: "WASAPI", current: true }] });
@@ -265,7 +281,7 @@
       const c = document.createElement("span");
       c.className = "chip";
       c.style.cssText = "color:#EED611;border-color:rgba(238,214,17,.4)";
-      c.innerHTML = '<span class="led" style="background:#EED611"></span>VISTA PREVIA · el sistema completo corre offline en el stand';
+      c.innerHTML = '<span class="led" style="background:#EED611"></span>DEMO';
       chips.prepend(c);
     }
     if ("speechSynthesis" in window) speechSynthesis.getVoices();

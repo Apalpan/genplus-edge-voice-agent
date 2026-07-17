@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMAIRC // CITY-TWIN NAVIGATOR v15.0 — VOICE</title>
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg-deep: #050810;
+            --bg-panel: rgba(10, 16, 26, 0.82);
+            --bg-panel-solid: #0c1320;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text-primary: #e8eef5;
+            --text-secondary: #8a96a8;
+            --text-mute: #4a5566;
+            --c-primary: #00d9ff;
+            --c-safety: #ff7a1a;
+            --c-alert: #ff2050;
+            --c-success: #00ff88;
+            --c-voice: #ff66cc;
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
+            --font-sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+        }
+        body {
+            margin: 0; overflow: hidden; background: var(--bg-deep);
+            font-family: var(--font-sans); color: var(--text-primary);
+            -webkit-font-smoothing: antialiased; font-weight: 400;
+        }
+
+        /* ============ HUD PANEL SYSTEM ============ */
+        .hud {
+            background: var(--bg-panel); backdrop-filter: blur(18px) saturate(150%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            position: relative; pointer-events: auto;
+            box-shadow: 0 24px 60px -16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .hud::before, .hud::after,
+        .hud > .corner-tr, .hud > .corner-bl {
+            content: ''; position: absolute; width: 10px; height: 10px;
+            border-color: var(--c-primary); border-style: solid; border-width: 0;
+            pointer-events: none;
+        }
+        .hud::before { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+        .hud::after { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+        .hud > .corner-tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+        .hud > .corner-bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+
+        .hud-header {
+            display: flex; align-items: center; justify-content: space-between;
+            font-family: var(--font-mono); font-size: 10px; letter-spacing: 2.2px;
+            color: var(--text-secondary); text-transform: uppercase; font-weight: 500;
+            padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 12px;
+        }
+        .hud-header .h-tag {
+            font-size: 9px; padding: 2px 6px; border: 1px solid var(--border-strong);
+            border-radius: 2px; color: var(--c-primary); font-weight: 700;
+        }
+
+        /* ============ LAYOUT ============ */
+        #ui {
+            position: absolute; inset: 0; pointer-events: none; z-index: 10;
+            display: grid; padding: 18px; gap: 14px;
+            grid-template-columns: 280px 1fr 300px;
+            grid-template-rows: 50px 1fr 170px;
+        }
+        .top { grid-column: 1/4; display: flex; gap: 14px; align-items: stretch; pointer-events: none; }
+        .side-l { display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .side-r { display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .center { grid-column: 2/3; pointer-events: none; position: relative; }
+        .bot { grid-column: 1/4; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 30px; pointer-events: none; }
+
+        /* ============ TOP BAR ============ */
+        .topbar {
+            flex: 1; padding: 10px 18px; display: flex; align-items: center; gap: 22px;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 14px; padding-right: 18px;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .brand-logo {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: linear-gradient(135deg, var(--c-primary), #0066ff);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #001; font-size: 11px; letter-spacing: 0.5px;
+            box-shadow: 0 0 22px rgba(0, 217, 255, 0.4);
+        }
+        .brand-meta { line-height: 1.15; }
+        .brand-title { font-weight: 700; font-size: 13px; letter-spacing: 0.4px; }
+        .brand-sub { font-family: var(--font-mono); font-size: 9px; color: var(--text-mute); letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .top-stat {
+            display: flex; flex-direction: column; gap: 1px;
+            padding-right: 18px; border-right: 1px solid var(--border-subtle);
+        }
+        .top-stat:last-of-type { border-right: none; }
+        .top-stat .lbl { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; color: var(--text-mute); text-transform: uppercase; }
+        .top-stat .val { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .top-stat .val.accent { color: var(--c-primary); }
+
+        .top-right {
+            display: flex; gap: 14px;
+        }
+        .icon-btn {
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; pointer-events: auto;
+            font-size: 16px; color: var(--text-secondary); transition: all 0.2s var(--easing);
+        }
+        .icon-btn:hover { color: var(--c-primary); }
+        .icon-btn.active { color: var(--c-success); }
+
+        .signal-bars {
+            display: flex; align-items: flex-end; gap: 2px; height: 14px;
+        }
+        .signal-bars span {
+            width: 3px; background: var(--c-success); display: inline-block; border-radius: 1px;
+            animation: signal-pulse 1.8s infinite var(--easing);
+        }
+        .signal-bars span:nth-child(1) { height: 25%; animation-delay: 0s; }
+        .signal-bars span:nth-child(2) { height: 50%; animation-delay: 0.2s; }
+        .signal-bars span:nth-child(3) { height: 75%; animation-delay: 0.4s; }
+        .signal-bars span:nth-child(4) { height: 100%; animation-delay: 0.6s; }
+        @keyframes signal-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* ============ LEFT PANEL (Zones / Telemetry) ============ */
+        .zone {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 9px 11px; margin-bottom: 4px; border-radius: 3px;
+            font-size: 12px; cursor: pointer; pointer-events: auto;
+            transition: all 0.2s var(--easing);
+            border-left: 2px solid transparent;
+            background: rgba(255,255,255,0.015);
+        }
+        .zone:hover { background: rgba(255,255,255,0.04); border-left-color: var(--text-mute); }
+        .zone.active { background: rgba(255, 122, 26, 0.08); border-left-color: var(--c-safety); }
+        .zone.alert { background: rgba(255, 32, 80, 0.08); border-left-color: var(--c-alert); }
+        .zone .name { font-weight: 500; }
+        .zone .code { font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); }
+        .zone .dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--text-mute);
+        }
+        .zone.active .dot { background: var(--c-safety); box-shadow: 0 0 8px var(--c-safety); animation: blip 1.5s infinite; }
+        .zone.alert .dot { background: var(--c-alert); box-shadow: 0 0 8px var(--c-alert); animation: blip 1.5s infinite; }
+        @keyframes blip { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 2px; font-family: var(--font-mono); font-size: 11px;
+            border-bottom: 1px dashed var(--border-subtle);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row .k { color: var(--text-mute); letter-spacing: 1px; text-transform: uppercase; font-size: 9px; }
+        .stat-row .v { color: var(--text-primary); font-weight: 600; }
+        .stat-row .v.alert { color: var(--c-safety); }
+        .stat-row .v.ok { color: var(--c-success); }
+
+        /* ============ RIGHT PANEL (Compass / Minimap / Alerts) ============ */
+        .compass-block { display: flex; gap: 12px; align-items: center; }
+        .compass {
+            width: 72px; height: 72px; position: relative; flex-shrink: 0;
+            border: 1px solid var(--border-strong); border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,217,255,0.06), transparent 70%);
+        }
+        .compass .n-marker {
+            position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+            font-size: 9px; color: var(--c-primary); font-weight: 700; letter-spacing: 1px;
+        }
+        .compass .needle {
+            position: absolute; top: 50%; left: 50%;
+            width: 2px; height: 28px; background: linear-gradient(to bottom, var(--c-safety) 0%, var(--c-safety) 50%, var(--text-mute) 50%, var(--text-mute) 100%);
+            transform-origin: 50% 50%; transform: translate(-50%, -50%) rotate(0deg);
+            transition: transform 0.3s var(--easing);
+            box-shadow: 0 0 8px var(--c-safety);
+        }
+        .compass .center-dot {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 5px; height: 5px; background: var(--c-primary); border-radius: 50%;
+        }
+
+        .minimap-wrap {
+            position: relative; aspect-ratio: 1; width: 100%; max-height: 200px;
+            border: 1px solid var(--border-subtle); border-radius: 3px;
+            background: #050a14; overflow: hidden;
+        }
+        #minimap { width: 100%; height: 100%; display: block; }
+        .minimap-scan {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,217,255,0.08) 50%, transparent 100%);
+            background-size: 100% 30%; background-repeat: no-repeat;
+            animation: minimap-scan 3.5s linear infinite;
+        }
+        @keyframes minimap-scan { 0% { background-position: 0 -30%; } 100% { background-position: 0 130%; } }
+
+        .alert-item {
+            display: flex; align-items: flex-start; gap: 8px;
+            padding: 8px; margin-bottom: 4px; border-radius: 3px;
+            background: rgba(255, 32, 80, 0.06); border-left: 2px solid var(--c-alert);
+            font-size: 11px; line-height: 1.45;
+        }
+        .alert-item.warn { background: rgba(255, 122, 26, 0.06); border-left-color: var(--c-safety); }
+        .alert-item .alert-icon { font-size: 13px; color: var(--c-alert); flex-shrink: 0; line-height: 1; }
+        .alert-item.warn .alert-icon { color: var(--c-safety); }
+
+        /* ============ BOTTOM ============ */
+        .stick {
+            width: 130px; height: 130px; position: relative; pointer-events: auto;
+            border-radius: 50%; border: 1.5px solid var(--border-strong);
+            background: rgba(8, 14, 22, 0.5); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s var(--easing);
+        }
+        .stick::before {
+            content: ''; position: absolute; inset: 14px;
+            border: 1px dashed var(--border-subtle); border-radius: 50%;
+        }
+        .stick.active { border-color: var(--c-primary); box-shadow: 0 0 22px rgba(0,217,255,0.25); }
+        .stick.active.right { border-color: var(--c-safety); box-shadow: 0 0 22px rgba(255,122,26,0.25); }
+        .stick-cur {
+            width: 14px; height: 14px; border-radius: 50%; position: absolute;
+            background: var(--text-secondary); box-shadow: 0 0 12px currentColor;
+            transition: transform 0.06s linear;
+        }
+        .stick.active .stick-cur { background: var(--c-primary); color: var(--c-primary); }
+        .stick.active.right .stick-cur { background: var(--c-safety); color: var(--c-safety); }
+        .stick-lbl {
+            position: absolute; bottom: -22px; width: 100%; text-align: center;
+            font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.8px;
+            color: var(--text-mute); text-transform: uppercase;
+        }
+        .stick.active .stick-lbl { color: var(--c-primary); }
+        .stick.active.right .stick-lbl { color: var(--c-safety); }
+
+        /* ============ VOICE BAR ============ */
+        .voice-zone {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            pointer-events: auto;
+        }
+        .voice-btn {
+            width: 64px; height: 64px; border-radius: 50%; cursor: pointer;
+            background: var(--bg-panel); border: 2px solid var(--border-strong);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: var(--text-primary);
+            transition: all 0.25s var(--easing); backdrop-filter: blur(12px);
+            position: relative;
+        }
+        .voice-btn:hover { transform: scale(1.05); border-color: var(--c-voice); }
+        .voice-btn.listening {
+            border-color: var(--c-voice); background: rgba(255, 102, 204, 0.15);
+            animation: vc-pulse 1.3s infinite;
+        }
+        .voice-btn.speaking { border-color: var(--c-primary); background: rgba(0, 217, 255, 0.12); }
+        @keyframes vc-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,102,204,0.55); }
+            50% { box-shadow: 0 0 0 16px rgba(255,102,204,0); }
+        }
+
+        .transcript {
+            min-width: 320px; max-width: 540px;
+            padding: 9px 16px; border-radius: 22px;
+            background: var(--bg-panel); border: 1px solid var(--border-subtle);
+            backdrop-filter: blur(14px); font-size: 12px;
+            opacity: 0; transform: translateY(6px); transition: all 0.3s var(--easing);
+        }
+        .transcript.show { opacity: 1; transform: translateY(0); }
+        .transcript .u { color: var(--c-voice); font-weight: 500; }
+        .transcript .a { color: var(--c-primary); margin-top: 3px; font-weight: 400; }
+
+        .voice-hint {
+            font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.8px;
+            color: var(--text-mute); text-transform: uppercase;
+        }
+
+        /* ============ CENTER OVERLAYS ============ */
+        .crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 36px; height: 36px; pointer-events: none; opacity: 0.4;
+            display: none;
+        }
+        .crosshair.show { display: block; }
+        .crosshair::before, .crosshair::after {
+            content: ''; position: absolute; background: var(--c-primary);
+        }
+        .crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+        .crosshair::after { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-50%); }
+
+        .coord-readout {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px;
+            color: var(--text-mute); pointer-events: none;
+        }
+        .coord-readout .v { color: var(--c-primary); }
+
+        /* ============ STATUS TICKER (Voice) ============ */
+        .voice-status {
+            position: absolute; top: 78px; left: 50%; transform: translateX(-50%);
+            padding: 6px 14px; border-radius: 16px;
+            background: var(--bg-panel); border: 1px solid var(--border-subtle);
+            backdrop-filter: blur(14px);
+            font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+            color: var(--c-voice); font-weight: 600;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 20;
+        }
+        .voice-status.show { opacity: 1; }
+        .voice-status .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c-voice); margin-right: 6px; animation: vc-pulse-small 1s infinite; }
+        @keyframes vc-pulse-small { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ============ LOADER ============ */
+        #loader {
+            position: fixed; inset: 0; z-index: 999;
+            background: radial-gradient(ellipse at center, #0a1320 0%, var(--bg-deep) 70%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 24px; transition: opacity 0.5s var(--easing);
+        }
+        #loader.hide { opacity: 0; pointer-events: none; }
+        .loader-logo {
+            width: 64px; height: 64px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--c-primary), #0066ff);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #001; font-size: 22px;
+            box-shadow: 0 0 60px rgba(0, 217, 255, 0.5);
+            animation: l-spin 2s infinite var(--easing);
+        }
+        @keyframes l-spin { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
+        .loader-text {
+            font-family: var(--font-mono); font-size: 11px; letter-spacing: 4px;
+            color: var(--text-secondary); text-transform: uppercase;
+        }
+        .loader-bar {
+            width: 240px; height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;
+        }
+        .loader-bar::after {
+            content: ''; display: block; width: 30%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--c-primary), transparent);
+            animation: l-bar 1.5s infinite linear;
+        }
+        @keyframes l-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(450%); } }
+
+        /* ============ API MODAL ============ */
+        #api-modal {
+            position: fixed; inset: 0; background: rgba(2, 5, 10, 0.92);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(20px);
+        }
+        #api-modal.hidden { display: none; }
+        #api-modal .box {
+            background: linear-gradient(145deg, #0e1828, #060b15);
+            border: 1px solid var(--border-strong); border-radius: 8px;
+            padding: 32px 36px; max-width: 460px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        #api-modal h2 {
+            margin: 0 0 6px; color: var(--text-primary);
+            font-size: 16px; letter-spacing: 0.5px; font-weight: 700;
+        }
+        #api-modal p { color: var(--text-secondary); font-size: 12px; line-height: 1.55; margin: 0 0 20px; }
+        #api-modal input {
+            width: 100%; padding: 12px 14px; border-radius: 4px;
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-strong);
+            color: var(--text-primary); font-size: 12px; font-family: var(--font-mono);
+        }
+        #api-modal input:focus { outline: none; border-color: var(--c-primary); }
+        #api-modal .actions { display: flex; gap: 8px; margin-top: 14px; }
+        #api-modal button {
+            padding: 10px 18px; border-radius: 4px; cursor: pointer;
+            font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px;
+            font-weight: 700; border: none;
+        }
+        #api-modal .btn-primary { background: var(--c-primary); color: #001; }
+        #api-modal .btn-primary:hover { background: #33e6ff; }
+        #api-modal .btn-skip { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+        #api-modal a { color: var(--c-primary); text-decoration: none; }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: absolute; top: 80px; right: 30px;
+            padding: 10px 16px; border-radius: 4px;
+            background: var(--bg-panel); border-left: 3px solid var(--c-primary);
+            backdrop-filter: blur(14px); font-size: 11px;
+            transform: translateX(120%); transition: transform 0.4s var(--easing);
+            z-index: 30; max-width: 260px; line-height: 1.5;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .toast.show { transform: translateX(0); }
+
+        #webcam { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-logo">⌖</div>
+        <div class="loader-text">CITY-TWIN // BOOTING</div>
+        <div class="loader-bar"></div>
+    </div>
+
+    <div id="api-modal" class="hidden">
+        <div class="box">
+            <h2>🎙 ACTIVAR ASISTENTE DE VOZ</h2>
+            <p>
+                Pega tu Google AI Studio API key (gratuita en
+                <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>).
+                Se guarda solo en este navegador. Sin key el visor funciona sin voz.
+            </p>
+            <input type="password" id="api-input" placeholder="AIzaSy..." autocomplete="off">
+            <div class="actions">
+                <button class="btn-primary" id="api-save">ACTIVAR VOZ</button>
+                <button class="btn-skip" id="api-skip">SIN VOZ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ui">
+
+        <!-- TOP BAR -->
+        <div class="top">
+            <div class="hud topbar">
+                <span class="corner-tr"></span><span class="corner-bl"></span>
+                <div class="brand">
+                    <div class="brand-logo">⌖</div>
+                    <div class="brand-meta">
+                        <div class="brand-title">Lima Sector 04</div>
+                        <div class="brand-sub">City-Twin Navigator</div>
+                    </div>
+                </div>
+
+                <div class="top-stat">
+                    <div class="lbl">CLOCK</div>
+                    <div class="val accent" id="ts-clock">00:00:00</div>
+                </div>
+                <div class="top-stat">
+                    <div class="lbl">WEATHER</div>
+                    <div class="val">CLEAR · 18°C</div>
+                </div>
+                <div class="top-stat">
+                    <div class="lbl">FPS</div>
+                    <div class="val" id="ts-fps">60</div>
+                </div>
+                <div class="top-stat" style="margin-left:auto">
+                    <div class="lbl">LINK</div>
+                    <div class="signal-bars"><span></span><span></span><span></span><span></span></div>
+                </div>
+
+                <div class="top-right">
+                    <div class="icon-btn" id="btn-night" title="Modo noche">☾</div>
+                    <div class="icon-btn" id="btn-tour" title="Sobrevuelo cinemático">▶</div>
+                    <div class="icon-btn" id="btn-reset" title="Resetear vista">⌂</div>
+                    <div class="icon-btn" id="btn-key" title="API key">🔑</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VOICE STATUS BADGE -->
+        <div class="voice-status" id="voice-status"><span class="dot"></span>ESCUCHANDO</div>
+
+        <!-- LEFT PANEL -->
+        <div class="side-l">
+            <div class="hud" style="padding:14px">
+                <span class="corner-tr"></span><span class="corner-bl"></span>
+                <div class="hud-header">
+                    <span>ZONAS DE OBRA</span>
+                    <span class="h-tag">3 ACTIVAS</span>
+                </div>
+                <div id="zone-list">
+                    <div class="zone alert" data-zone="A-12" data-x="-200" data-z="-100">
+                        <div><div class="name">Bloque A-12</div><div class="code">CRANE OPS · 12 PERS</div></div>
+                        <div class="dot"></div>
+                    </div>
+                    <div class="zone" data-zone="B-04" data-x="180" data-z="50">
+                        <div><div class="name">Bloque B-04</div><div class="code">FOUNDATION · 8 PERS</div></div>
+                        <div class="dot"></div>
+                    </div>
+                    <div class="zone alert" data-zone="C-09" data-x="100" data-z="-280">
+                        <div><div class="name">Bloque C-09</div><div class="code">HIGH RISK · 5 PERS</div></div>
+                        <div class="dot"></div>
+                    </div>
+                    <div class="zone active" data-zone="D-22" data-x="-150" data-z="220">
+                        <div><div class="name">Bloque D-22</div><div class="code">STEEL · 14 PERS</div></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud" style="padding:14px">
+                <span class="corner-tr"></span><span class="corner-bl"></span>
+                <div class="hud-header"><span>TELEMETRÍA</span><span class="h-tag">LIVE</span></div>
+                <div class="stat-row"><span class="k">VELOCIDAD</span><span class="v" id="t-spd">0 km/h</span></div>
+                <div class="stat-row"><span class="k">ALTITUD</span><span class="v" id="t-alt">200 m</span></div>
+                <div class="stat-row"><span class="k">RUMBO</span><span class="v" id="t-head">0°</span></div>
+                <div class="stat-row"><span class="k">ZOOM</span><span class="v ok" id="t-zoom">100%</span></div>
+                <div class="stat-row"><span class="k">COORD X·Z</span><span class="v" id="t-coord">0 · 0</span></div>
+            </div>
+        </div>
+
+        <!-- CENTER OVERLAYS -->
+        <div class="center">
+            <div class="crosshair" id="crosshair"></div>
+            <div class="coord-readout">CAM <span class="v" id="cam-readout">N 0.00 · E 0.00</span></div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="side-r">
+            <div class="hud" style="padding:14px">
+                <span class="corner-tr"></span><span class="corner-bl"></span>
+                <div class="hud-header"><span>RADAR · BRÚJULA</span><span class="h-tag">2D</span></div>
+                <div class="compass-block">
+                    <div class="compass">
+                        <div class="n-marker">N</div>
+                        <div class="needle" id="needle"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                    <div style="flex:1">
+                        <div class="stat-row"><span class="k">PROYECTO</span><span class="v">L4-2026</span></div>
+                        <div class="stat-row"><span class="k">FASE</span><span class="v ok">EJECUCIÓN</span></div>
+                        <div class="stat-row"><span class="k">RIESGO</span><span class="v alert">MEDIO</span></div>
+                    </div>
+                </div>
+                <div class="minimap-wrap" style="margin-top:12px">
+                    <canvas id="minimap" width="240" height="240"></canvas>
+                    <div class="minimap-scan"></div>
+                </div>
+            </div>
+
+            <div class="hud" style="padding:14px">
+                <span class="corner-tr"></span><span class="corner-bl"></span>
+                <div class="hud-header" style="color:var(--c-alert)"><span>ALERTAS</span><span class="h-tag" style="color:var(--c-alert); border-color:rgba(255,32,80,0.4)">2 NUEVAS</span></div>
+                <div class="alert-item">
+                    <span class="alert-icon">⚠</span>
+                    <div><strong>Zona C-09</strong>: Proximity breach detectado a 12m del límite.</div>
+                </div>
+                <div class="alert-item warn">
+                    <span class="alert-icon">⚡</span>
+                    <div><strong>Grúa 2</strong>: Aproximándose al límite de carga (87%).</div>
+                </div>
+                <button id="read-alerts" style="margin-top:8px; width:100%; padding:8px; background:rgba(255,32,80,0.1); border:1px solid rgba(255,32,80,0.3); color:var(--text-primary); border-radius:3px; cursor:pointer; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; pointer-events:auto;">▶ LEER EN VOZ ALTA</button>
+            </div>
+        </div>
+
+        <!-- BOTTOM -->
+        <div class="bot">
+            <div class="stick" id="hud-l">
+                <div class="stick-cur" id="cur-l"></div>
+                <div class="stick-lbl">MOVER · PAN</div>
+            </div>
+
+            <div class="voice-zone">
+                <div class="transcript" id="transcript">
+                    <div class="u" id="t-user"></div>
+                    <div class="a" id="t-ai"></div>
+                </div>
+                <button class="voice-btn" id="voice-btn" title="Habla (Espacio)">🎙</button>
+                <div class="voice-hint">VOZ · BARRA ESPACIADORA</div>
+            </div>
+
+            <div class="stick right" id="hud-r">
+                <div class="stick-cur" id="cur-r"></div>
+                <div class="stick-lbl">ROTAR · ZOOM</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <video id="webcam" autoplay playsinline></video>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./vendor/three/build/three.module.js",
+                "three/addons/": "./vendor/three/examples/jsm/",
+                "@mediapipe/tasks-vision": "./vendor/mediapipe/vision_bundle.mjs"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+
+        const CONFIG = {
+            gridSize: 1600, buildingCount: 3200,
+            zones: [
+                { id: 'A-12', x: -200, z: -100, status: 'alert',  label: 'Bloque A-12 · Crane Ops' },
+                { id: 'B-04', x:  180, z:   50, status: 'idle',   label: 'Bloque B-04 · Foundation' },
+                { id: 'C-09', x:  100, z: -280, status: 'alert',  label: 'Bloque C-09 · High Risk' },
+                { id: 'D-22', x: -150, z:  220, status: 'active', label: 'Bloque D-22 · Steel' }
+            ]
+        };
+
+        const CityVertex = `
+            attribute vec3 instancePos; attribute vec3 instanceScale; attribute float instanceType;
+            varying vec3 vPos; varying vec2 vUv; varying float vType; varying float vHeight;
+            void main() {
+                vUv = uv; vType = instanceType; vHeight = position.y * instanceScale.y;
+                vec3 pos = position * instanceScale;
+                vec3 finalPos = pos + instancePos;
+                vPos = finalPos;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPos, 1.0);
+            }
+        `;
+        const CityFragment = `
+            uniform float uTime; uniform float uNight; uniform vec3 uFocus; uniform float uFocusGlow;
+            varying vec3 vPos; varying vec2 vUv; varying float vType; varying float vHeight;
+            void main() {
+                vec3 cBlue = vec3(0.0, 0.55, 1.0); vec3 cOrange = vec3(1.0, 0.45, 0.1);
+                vec3 baseColor = (vType > 0.5) ? cOrange : cBlue;
+                float border = step(0.96, vUv.x) + step(0.96, vUv.y) + step(vUv.x, 0.04) + step(vUv.y, 0.04);
+                border = clamp(border, 0.0, 1.0);
+                float scan = smoothstep(0.4, 0.5, fract((vPos.y * 0.04) - uTime * 0.5));
+                float fillOp = 0.08 + (vHeight / 250.0) * 0.35;
+                vec3 col = baseColor * (fillOp + border * 0.6 + scan * 0.5);
+                if (vType < 0.5) {
+                    float wins = step(0.5, sin(vPos.y * 2.0) * sin(vPos.x * 2.0));
+                    col += wins * baseColor * (0.15 + uNight * 0.35) * (1.0 - scan);
+                }
+                if (uFocusGlow > 0.0) {
+                    float d = distance(vPos.xz, uFocus.xz);
+                    float pulse = 0.5 + 0.5 * sin(uTime * 3.0);
+                    col += vec3(0.3, 1.0, 0.6) * smoothstep(80.0, 20.0, d) * pulse * uFocusGlow;
+                }
+                gl_FragColor = vec4(col, 0.85);
+            }
+        `;
+
+        let scene, camera, renderer, composer, cityMesh, gridHelper;
+        let handLandmarker, video, lastVideoTime = 0;
+        let frameCount = 0, fpsT = performance.now();
+
+        const nav = {
+            pos: new THREE.Vector3(0, 0, 0), targetPos: new THREE.Vector3(0, 0, 0),
+            rot: 0, targetRot: 0,
+            zoom: 200, targetZoom: 200,
+            vMove: new THREE.Vector2(), vRot: 0, vZoom: 0,
+            night: 0, tNight: 0,
+            focus: new THREE.Vector3(), focusGlow: 0, tFocusGlow: 0,
+            flying: false, flyT: 0, flyFrom: new THREE.Vector3(), flyTo: new THREE.Vector3(), flyRotFrom: 0, flyRotTo: 0,
+            cinematic: false, cinemaT: 0
+        };
+
+        const voice = {
+            apiKey: localStorage.getItem('gemini_key') || '',
+            recognition: null, isListening: false, isSpeaking: false,
+            currentAudio: null, lastSpoken: 0
+        };
+
+        // ============ INIT ============
+        async function init() {
+            initThree();
+            initCity();
+            initPost();
+            initMinimap();
+            await initAI();
+            initVoiceUI();
+            initEvents();
+            startClock();
+            setTimeout(() => document.getElementById('loader').classList.add('hide'), 800);
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                if (!voice.apiKey) showApiModal(true);
+                else toast('🎙 Voz activa. Pulsa Espacio o el botón mic.');
+            }, 1400);
+            animate();
+        }
+
+        function initThree() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050810);
+            scene.fog = new THREE.FogExp2(0x050810, 0.0014);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 4000);
+            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+        }
+
+        function initCity() {
+            gridHelper = new THREE.GridHelper(3200, 160, 0x004488, 0x001122);
+            scene.add(gridHelper);
+
+            const geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
+            const mat = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 }, uNight: { value: 0 },
+                    uFocus: { value: new THREE.Vector3() }, uFocusGlow: { value: 0 }
+                },
+                vertexShader: CityVertex, fragmentShader: CityFragment,
+                transparent: true, depthWrite: true
+            });
+            cityMesh = new THREE.InstancedMesh(geo, mat, CONFIG.buildingCount);
+            const p = [], s = [], t = [];
+            const gs = 40;
+            for (let i = 0; i < CONFIG.buildingCount; i++) {
+                let x = Math.round(((Math.random() - 0.5) * CONFIG.gridSize) / gs) * gs;
+                let z = Math.round(((Math.random() - 0.5) * CONFIG.gridSize) / gs) * gs;
+                let h = 20 + Math.random() * 100;
+                if (Math.sqrt(x*x + z*z) < 300) h *= 2.5;
+                p.push(x, 0, z);
+                s.push(15 + Math.random() * 15, h, 15 + Math.random() * 15);
+                t.push(Math.random() > 0.95 ? 1 : 0);
+            }
+            cityMesh.geometry.setAttribute('instancePos', new THREE.InstancedBufferAttribute(new Float32Array(p), 3));
+            cityMesh.geometry.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(new Float32Array(s), 3));
+            cityMesh.geometry.setAttribute('instanceType', new THREE.InstancedBufferAttribute(new Float32Array(t), 1));
+            scene.add(cityMesh);
+        }
+
+        function initPost() {
+            composer = new EffectComposer(renderer);
+            composer.addPass(new RenderPass(scene, camera));
+            composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.6, 0.4, 0.35));
+        }
+
+        async function initAI() {
+            const vision = await FilesetResolver.forVisionTasks("./vendor/mediapipe/wasm");
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: { modelAssetPath: `./vendor/mediapipe/hand_landmarker.task`, delegate: "GPU" },
+                runningMode: "VIDEO", numHands: 2
+            });
+            video = document.getElementById('webcam');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.addEventListener("loadeddata", loopAI);
+            } catch (e) {
+                console.warn('No camera, gestures off');
+                toast('Sin cámara. Usa la voz para navegar.');
+            }
+        }
+
+        // ============ DUAL-HAND CONTROLS ============
+        function updateControls(hands) {
+            const cL = document.getElementById('cur-l'), cR = document.getElementById('cur-r');
+            const hL = document.getElementById('hud-l'), hR = document.getElementById('hud-r');
+            nav.vMove.set(0, 0); nav.vRot = 0; nav.vZoom = 0;
+            hL.classList.remove('active'); hR.classList.remove('active');
+
+            for (const hand of hands) {
+                const palm = hand[9];
+                const x = 1.0 - palm.x, y = palm.y;
+                if (x < 0.5) {
+                    hL.classList.add('active');
+                    const jx = (x - 0.25) * 4, jy = (y - 0.5) * 2;
+                    if (Math.abs(jx) > 0.1) nav.vMove.x = jx;
+                    if (Math.abs(jy) > 0.1) nav.vMove.y = jy;
+                    const lim = 50;
+                    cL.style.transform = `translate(${Math.max(-lim, Math.min(lim, jx*lim))}px, ${Math.max(-lim, Math.min(lim, jy*lim))}px)`;
+                } else {
+                    hR.classList.add('active');
+                    const jx = (x - 0.75) * 4, jy = (y - 0.5) * 2;
+                    if (Math.abs(jx) > 0.1) nav.vRot = jx;
+                    if (Math.abs(jy) > 0.1) nav.vZoom = jy;
+                    const lim = 50;
+                    cR.style.transform = `translate(${Math.max(-lim, Math.min(lim, jx*lim))}px, ${Math.max(-lim, Math.min(lim, jy*lim))}px)`;
+                }
+            }
+        }
+
+        function loopAI() {
+            if (video.currentTime !== lastVideoTime && handLandmarker) {
+                lastVideoTime = video.currentTime;
+                updateControls(handLandmarker.detectForVideo(video, performance.now()).landmarks);
+            }
+            requestAnimationFrame(loopAI);
+        }
+
+        // ============ ANIMATION + PHYSICS ============
+        function animate() {
+            requestAnimationFrame(animate);
+            const t = performance.now() * 0.001;
+
+            // Fly-to interpolation
+            if (nav.flying) {
+                nav.flyT += 0.012;
+                const k = easeInOut(Math.min(1, nav.flyT));
+                nav.targetPos.lerpVectors(nav.flyFrom, nav.flyTo, k);
+                nav.targetRot = nav.flyRotFrom + (nav.flyRotTo - nav.flyRotFrom) * k;
+                if (nav.flyT >= 1) { nav.flying = false; }
+            }
+
+            // Cinematic orbit
+            if (nav.cinematic) {
+                nav.cinemaT += 0.004;
+                nav.targetRot = nav.cinemaT;
+                nav.targetPos.x = Math.sin(nav.cinemaT * 0.4) * 200;
+                nav.targetPos.z = Math.cos(nav.cinemaT * 0.4) * 200;
+                nav.targetZoom = 180 + Math.sin(nav.cinemaT * 0.7) * 40;
+            }
+
+            // Smooth input
+            const moveSpeed = 9, rotSpeed = 0.02, zoomSpeed = 4.5;
+            nav.targetRot -= nav.vRot * rotSpeed;
+            nav.rot += (nav.targetRot - nav.rot) * 0.12;
+            nav.targetZoom = Math.max(50, Math.min(800, nav.targetZoom + nav.vZoom * zoomSpeed));
+            nav.zoom += (nav.targetZoom - nav.zoom) * 0.1;
+
+            const ang = nav.rot;
+            nav.targetPos.x += (Math.sin(ang) * nav.vMove.y + Math.cos(ang) * nav.vMove.x) * moveSpeed;
+            nav.targetPos.z += (Math.cos(ang) * nav.vMove.y - Math.sin(ang) * nav.vMove.x) * moveSpeed;
+            nav.pos.lerp(nav.targetPos, 0.1);
+
+            nav.night += (nav.tNight - nav.night) * 0.05;
+            nav.focusGlow += (nav.tFocusGlow - nav.focusGlow) * 0.06;
+
+            // Camera orbit
+            const offsetH = nav.zoom * 1.5;
+            const offsetV = nav.zoom * 1.0;
+            camera.position.x = nav.pos.x + Math.sin(nav.rot) * offsetH;
+            camera.position.z = nav.pos.z + Math.cos(nav.rot) * offsetH;
+            camera.position.y = offsetV;
+            camera.lookAt(nav.pos);
+
+            // Shader uniforms
+            if (cityMesh) {
+                const u = cityMesh.material.uniforms;
+                u.uTime.value = t;
+                u.uNight.value = nav.night;
+                u.uFocus.value.copy(nav.focus);
+                u.uFocusGlow.value = nav.focusGlow;
+            }
+
+            // Background based on night
+            const bgIntensity = 0.95 - nav.night * 0.7;
+            scene.background.setRGB(0.02 * bgIntensity, 0.03 * bgIntensity, 0.06 * bgIntensity);
+            scene.fog.color.copy(scene.background);
+
+            // UI
+            document.getElementById('t-spd').innerText = Math.abs(Math.round(nav.vMove.y * 100)) + ' km/h';
+            document.getElementById('t-alt').innerText = Math.round(nav.zoom) + ' m';
+            const deg = ((nav.rot * 180 / Math.PI) % 360 + 360) % 360;
+            document.getElementById('t-head').innerText = Math.round(deg) + '°';
+            document.getElementById('t-zoom').innerText = Math.round((200 / nav.zoom) * 100) + '%';
+            document.getElementById('t-coord').innerText = `${Math.round(nav.pos.x)} · ${Math.round(nav.pos.z)}`;
+            document.getElementById('cam-readout').innerText = `${nav.pos.z >= 0 ? 'N' : 'S'} ${Math.abs(nav.pos.z).toFixed(0)} · ${nav.pos.x >= 0 ? 'E' : 'W'} ${Math.abs(nav.pos.x).toFixed(0)}`;
+            document.getElementById('needle').style.transform = `translate(-50%, -50%) rotate(${-deg}deg)`;
+
+            // FPS counter
+            frameCount++;
+            const now = performance.now();
+            if (now - fpsT >= 500) {
+                document.getElementById('ts-fps').innerText = Math.round((frameCount * 1000) / (now - fpsT));
+                frameCount = 0; fpsT = now;
+            }
+
+            drawMinimap();
+            composer.render();
+        }
+
+        const easeInOut = k => k < 0.5 ? 2*k*k : -1 + (4 - 2*k) * k;
+
+        // ============ MINIMAP ============
+        let mmCtx;
+        function initMinimap() {
+            const c = document.getElementById('minimap');
+            mmCtx = c.getContext('2d');
+        }
+        function drawMinimap() {
+            if (!mmCtx) return;
+            const W = 240, H = 240;
+            const scale = 0.12;
+            mmCtx.clearRect(0, 0, W, H);
+            mmCtx.fillStyle = '#050a14'; mmCtx.fillRect(0, 0, W, H);
+
+            // Grid
+            mmCtx.strokeStyle = 'rgba(0,217,255,0.12)'; mmCtx.lineWidth = 0.5;
+            for (let i = 0; i <= W; i += 24) {
+                mmCtx.beginPath(); mmCtx.moveTo(i, 0); mmCtx.lineTo(i, H); mmCtx.stroke();
+                mmCtx.beginPath(); mmCtx.moveTo(0, i); mmCtx.lineTo(W, i); mmCtx.stroke();
+            }
+
+            // Center crosshair
+            mmCtx.strokeStyle = 'rgba(0,217,255,0.25)';
+            mmCtx.beginPath(); mmCtx.moveTo(W/2, H/2-6); mmCtx.lineTo(W/2, H/2+6);
+            mmCtx.moveTo(W/2-6, H/2); mmCtx.lineTo(W/2+6, H/2); mmCtx.stroke();
+
+            // Zones
+            for (const z of CONFIG.zones) {
+                const x = W/2 + (z.x - nav.pos.x) * scale;
+                const y = H/2 - (z.z - nav.pos.z) * scale;
+                if (x < 0 || x > W || y < 0 || y > H) continue;
+                const c = z.status === 'alert' ? '#ff2050' : z.status === 'active' ? '#ff7a1a' : '#00d9ff';
+                mmCtx.fillStyle = c;
+                mmCtx.beginPath(); mmCtx.arc(x, y, 4, 0, Math.PI*2); mmCtx.fill();
+                mmCtx.strokeStyle = c + '66';
+                mmCtx.beginPath(); mmCtx.arc(x, y, 8 + Math.sin(performance.now()*0.003)*2, 0, Math.PI*2); mmCtx.stroke();
+                mmCtx.fillStyle = '#e8eef5'; mmCtx.font = '9px JetBrains Mono';
+                mmCtx.fillText(z.id, x + 7, y + 3);
+            }
+
+            // Player marker
+            mmCtx.save();
+            mmCtx.translate(W/2, H/2);
+            mmCtx.rotate(-nav.rot);
+            mmCtx.fillStyle = '#00ff88';
+            mmCtx.beginPath();
+            mmCtx.moveTo(0, -8); mmCtx.lineTo(5, 5); mmCtx.lineTo(-5, 5); mmCtx.closePath();
+            mmCtx.fill();
+            // FOV cone
+            mmCtx.strokeStyle = 'rgba(0,255,136,0.25)'; mmCtx.fillStyle = 'rgba(0,255,136,0.05)';
+            mmCtx.beginPath(); mmCtx.moveTo(0, 0);
+            mmCtx.arc(0, 0, 60, -Math.PI/2 - 0.5, -Math.PI/2 + 0.5);
+            mmCtx.closePath(); mmCtx.fill(); mmCtx.stroke();
+            mmCtx.restore();
+        }
+
+        // ============ EVENTS ============
+        function initEvents() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                composer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Zone click → fly
+            document.querySelectorAll('.zone').forEach(el => {
+                el.onclick = () => flyToZone(el.dataset.zone);
+            });
+
+            document.getElementById('btn-night').onclick = () => {
+                nav.tNight = nav.tNight > 0.5 ? 0 : 1;
+                document.getElementById('btn-night').classList.toggle('active');
+                toast(nav.tNight > 0.5 ? '🌙 Modo nocturno activado' : '☀ Modo diurno activado');
+            };
+            document.getElementById('btn-tour').onclick = () => {
+                nav.cinematic = !nav.cinematic;
+                if (nav.cinematic) { nav.cinemaT = nav.rot; toast('▶ Sobrevuelo cinemático activado'); }
+                else toast('■ Sobrevuelo detenido');
+                document.getElementById('btn-tour').classList.toggle('active');
+            };
+            document.getElementById('btn-reset').onclick = () => resetView();
+            document.getElementById('btn-key').onclick = () => showApiModal(true);
+
+            document.getElementById('read-alerts').onclick = () => readAlerts();
+
+            document.getElementById('voice-btn').onclick = toggleListening;
+
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat && !e.target.matches('input')) {
+                    e.preventDefault(); toggleListening();
+                }
+            });
+        }
+
+        function flyToZone(zoneId) {
+            const z = CONFIG.zones.find(x => x.id === zoneId);
+            if (!z) return;
+            nav.flying = true; nav.flyT = 0;
+            nav.flyFrom.copy(nav.targetPos);
+            nav.flyTo.set(z.x, 0, z.z);
+            nav.flyRotFrom = nav.targetRot;
+            nav.flyRotTo = Math.atan2(z.x - nav.targetPos.x, z.z - nav.targetPos.z);
+            nav.focus.set(z.x, 0, z.z);
+            nav.tFocusGlow = 1;
+            setTimeout(() => nav.tFocusGlow = 0, 4500);
+            speak(`Volando a ${z.label}.`);
+            highlightZone(zoneId);
+        }
+
+        function highlightZone(id) {
+            document.querySelectorAll('.zone').forEach(el => {
+                el.style.outline = el.dataset.zone === id ? '1px solid var(--c-success)' : 'none';
+            });
+        }
+
+        function resetView() {
+            nav.targetPos.set(0, 0, 0); nav.targetRot = 0; nav.targetZoom = 200;
+            nav.flying = false; nav.cinematic = false;
+            document.getElementById('btn-tour').classList.remove('active');
+            highlightZone(null);
+            toast('⌂ Vista reseteada');
+        }
+
+        function startClock() {
+            const update = () => {
+                const d = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                document.getElementById('ts-clock').innerText = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            };
+            update(); setInterval(update, 1000);
+        }
+
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ============ VOICE STACK ============
+        function showApiModal(show) {
+            const m = document.getElementById('api-modal');
+            if (show) { m.classList.remove('hidden'); if (voice.apiKey) document.getElementById('api-input').value = voice.apiKey; }
+            else m.classList.add('hidden');
+        }
+
+        function initVoiceUI() {
+            document.getElementById('api-save').onclick = () => {
+                const k = document.getElementById('api-input').value.trim();
+                if (k.length > 10) {
+                    voice.apiKey = k; localStorage.setItem('gemini_key', k);
+                    showApiModal(false); speak('Asistente activo. Habla cuando quieras.');
+                }
+            };
+            document.getElementById('api-skip').onclick = () => showApiModal(false);
+            initSTT();
+        }
+
+        function initSTT() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) { console.warn('No SpeechRecognition'); return; }
+            voice.recognition = new SR();
+            voice.recognition.lang = 'es-PE';
+            voice.recognition.interimResults = false;
+            voice.recognition.maxAlternatives = 1;
+            voice.recognition.onresult = (e) => {
+                const text = e.results[0][0].transcript;
+                showTranscript(text, '...');
+                handleVoiceCommand(text);
+            };
+            voice.recognition.onend = () => {
+                voice.isListening = false;
+                document.getElementById('voice-btn').classList.remove('listening');
+                document.getElementById('voice-status').classList.remove('show');
+            };
+            voice.recognition.onerror = () => {
+                voice.isListening = false;
+                document.getElementById('voice-btn').classList.remove('listening');
+                document.getElementById('voice-status').classList.remove('show');
+            };
+        }
+
+        function toggleListening() {
+            if (!voice.recognition) { toast('Reconocimiento de voz solo en Chrome/Edge.'); return; }
+            if (!voice.apiKey) { showApiModal(true); return; }
+            if (voice.isListening) { voice.recognition.stop(); return; }
+            stopSpeaking();
+            try {
+                voice.recognition.start();
+                voice.isListening = true;
+                document.getElementById('voice-btn').classList.add('listening');
+                document.getElementById('voice-status').classList.add('show');
+            } catch (e) { console.warn(e); }
+        }
+
+        function showTranscript(u, a) {
+            const t = document.getElementById('transcript');
+            t.classList.add('show');
+            document.getElementById('t-user').innerText = '🗣 ' + u;
+            document.getElementById('t-ai').innerText = a ? '🤖 ' + a : '';
+            clearTimeout(showTranscript._t);
+            showTranscript._t = setTimeout(() => t.classList.remove('show'), 9000);
+        }
+
+        async function handleVoiceCommand(text) {
+            const zonesStr = CONFIG.zones.map(z => `${z.id} (${z.label})`).join(', ');
+            const prompt = `Eres el asistente de voz del "City-Twin Navigator" de Lima Sector 04 (visor 3D urbano para obras).
+Zonas disponibles: ${zonesStr}
+Estado actual: posición x=${Math.round(nav.pos.x)}, z=${Math.round(nav.pos.z)}, rumbo=${Math.round((nav.rot*180/Math.PI)%360)}°, altitud=${Math.round(nav.zoom)}m, modo=${nav.tNight>0.5?'noche':'día'}.
+
+Convierte el comando del usuario a JSON estricto (sin markdown) con estructura:
+{
+  "action": "fly_to_zone" | "move" | "rotate" | "zoom" | "altitude" | "reset" | "aerial" | "night_mode" | "day_mode" | "cinematic" | "stop_cinematic" | "read_alerts" | "highlight_hazards" | "show_all" | "chat",
+  "params": {},
+  "response": "respuesta corta para hablar"
+}
+
+Params:
+- fly_to_zone: { zone: "A-12"|"B-04"|"C-09"|"D-22" }
+- move: { direction: "north"|"south"|"east"|"west", distance: 100 }
+- rotate: { degrees: number, absolute: bool }
+- zoom: { delta: number } (negativo=acercar)
+- altitude: { meters: 50-800 }
+- night_mode/day_mode/aerial/reset/cinematic/stop_cinematic/read_alerts/highlight_hazards/show_all: {}
+- chat: { answer: "respuesta a pregunta libre" }
+
+Ejemplos:
+- "vuela a la zona C-09" → fly_to_zone C-09
+- "muévete al norte" → move north 200
+- "acércate" → zoom -50
+- "modo noche" → night_mode
+- "haz un sobrevuelo" → cinematic
+- "muestra solo zonas peligrosas" → highlight_hazards
+- "qué pasa en C-09" → chat con answer relevante
+
+Sé conciso en "response" (máx 12 palabras), español peruano natural.
+
+Comando: "${text}"`;
+
+            try {
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${voice.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { responseMimeType: "application/json", temperature: 0.3 }
+                    })
+                });
+                if (!resp.ok) throw new Error('Gemini ' + resp.status);
+                const data = await resp.json();
+                const intent = JSON.parse(data.candidates[0].content.parts[0].text);
+                showTranscript(text, intent.response || '');
+                await speak(intent.response || 'Listo');
+                applyAction(intent.action, intent.params || {});
+            } catch (e) {
+                console.error(e);
+                showTranscript(text, 'No pude procesar eso.');
+                speak('Disculpa, no entendí ese comando.');
+            }
+        }
+
+        function applyAction(action, p) {
+            switch (action) {
+                case 'fly_to_zone': flyToZone(p.zone); break;
+                case 'move': {
+                    const d = p.distance || 200;
+                    nav.flying = true; nav.flyT = 0;
+                    nav.flyFrom.copy(nav.targetPos);
+                    nav.flyTo.copy(nav.targetPos);
+                    if (p.direction === 'north') nav.flyTo.z -= d;
+                    if (p.direction === 'south') nav.flyTo.z += d;
+                    if (p.direction === 'east')  nav.flyTo.x += d;
+                    if (p.direction === 'west')  nav.flyTo.x -= d;
+                    nav.flyRotFrom = nav.targetRot; nav.flyRotTo = nav.targetRot;
+                    break;
+                }
+                case 'rotate':
+                    if (p.absolute) nav.targetRot = (p.degrees || 0) * Math.PI / 180;
+                    else nav.targetRot += (p.degrees || 45) * Math.PI / 180;
+                    break;
+                case 'zoom': nav.targetZoom = Math.max(50, Math.min(800, nav.targetZoom + (p.delta || -50))); break;
+                case 'altitude': nav.targetZoom = Math.max(50, Math.min(800, p.meters || 200)); break;
+                case 'aerial': nav.targetZoom = 600; nav.targetRot = Math.PI / 4; break;
+                case 'reset': resetView(); break;
+                case 'night_mode': nav.tNight = 1; document.getElementById('btn-night').classList.add('active'); break;
+                case 'day_mode': nav.tNight = 0; document.getElementById('btn-night').classList.remove('active'); break;
+                case 'cinematic': nav.cinematic = true; nav.cinemaT = nav.rot; document.getElementById('btn-tour').classList.add('active'); break;
+                case 'stop_cinematic': nav.cinematic = false; document.getElementById('btn-tour').classList.remove('active'); break;
+                case 'read_alerts': setTimeout(readAlerts, 700); break;
+                case 'highlight_hazards': {
+                    // Focus on first alert zone
+                    const a = CONFIG.zones.find(z => z.status === 'alert');
+                    if (a) flyToZone(a.id);
+                    break;
+                }
+                case 'show_all': resetView(); break;
+                case 'chat': break;
+            }
+        }
+
+        // ── Puente de voz gen+ (16-jul): la plataforma manda acciones ya parseadas
+        // por postMessage (Whisper local, sin Gemini ni internet) y este ejecutor
+        // las aplica. Responde con acuse para que la UI muestre el ✓.
+        window.addEventListener('message', (e) => {
+            const d = e.data;
+            if (!d || d.tipo !== 'voz_nav' || !d.action) return;
+            try {
+                applyAction(d.action, d.params || {});
+                parent.postMessage({ tipo: 'voz_nav_ok', action: d.action }, '*');
+            } catch (err) {
+                parent.postMessage({ tipo: 'voz_nav_err', action: d.action,
+                                     error: String(err).slice(0, 80) }, '*');
+            }
+        });
+
+        async function readAlerts() {
+            await speak('Atención. Zona C-09: detección de proximidad a 12 metros del límite establecido. Y, la grúa 2 se está acercando al 87% del límite de carga seguro. Recomendación: pausar operaciones de izaje.');
+        }
+
+        async function speak(text) {
+            if (!voice.apiKey || !text) return;
+            stopSpeaking();
+            voice.isSpeaking = true;
+            const btn = document.getElementById('voice-btn');
+            btn.classList.add('speaking');
+            try {
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${voice.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: 'Lee con tono profesional, calmo, acento neutro español, ritmo pausado: ' + text }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+                        }
+                    })
+                });
+                if (!resp.ok) { voice.isSpeaking = false; btn.classList.remove('speaking'); return; }
+                const data = await resp.json();
+                const inline = data.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+                if (!inline) { voice.isSpeaking = false; btn.classList.remove('speaking'); return; }
+                const pcm = base64ToArrayBuffer(inline.data);
+                const sr = parseInt((inline.mimeType.match(/rate=(\d+)/) || [0, 24000])[1]);
+                const wav = pcmToWav(pcm, sr);
+                const audio = new Audio(URL.createObjectURL(new Blob([wav], { type: 'audio/wav' })));
+                voice.currentAudio = audio;
+                audio.onended = () => { voice.isSpeaking = false; btn.classList.remove('speaking'); };
+                audio.play();
+            } catch (e) {
+                console.error(e); voice.isSpeaking = false; btn.classList.remove('speaking');
+            }
+        }
+
+        function stopSpeaking() {
+            if (voice.currentAudio) { voice.currentAudio.pause(); voice.currentAudio = null; }
+            voice.isSpeaking = false;
+            document.getElementById('voice-btn').classList.remove('speaking');
+        }
+
+        function base64ToArrayBuffer(b64) {
+            const bin = atob(b64), buf = new ArrayBuffer(bin.length), v = new Uint8Array(buf);
+            for (let i = 0; i < bin.length; i++) v[i] = bin.charCodeAt(i);
+            return buf;
+        }
+        function pcmToWav(pcm, sr) {
+            const ch = 1, bps = 16, br = sr * ch * bps / 8, ba = ch * bps / 8, ds = pcm.byteLength;
+            const buf = new ArrayBuffer(44 + ds), v = new DataView(buf);
+            const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+            ws(0, 'RIFF'); v.setUint32(4, 36 + ds, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+            v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, ch, true);
+            v.setUint32(24, sr, true); v.setUint32(28, br, true); v.setUint16(32, ba, true);
+            v.setUint16(34, bps, true); ws(36, 'data'); v.setUint32(40, ds, true);
+            new Uint8Array(buf, 44).set(new Uint8Array(pcm));
+            return buf;
+        }
+
+        init();
+    </script>
+</body>
+</html>

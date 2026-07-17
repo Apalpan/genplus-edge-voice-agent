@@ -6,10 +6,10 @@
 <title>Ranking del día · gen+</title>
 <style>
   /* Tokens GEN+ (DESIGN.md §11 dark) — mismo lienzo que la pantalla principal */
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:block}
-  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:swap}
   :root{
     --navy:#040F20;--surface:#06142A;--raised:#0A244C;
     --blue:#4D84FF;--blue-primary:#2165FF;--ice:#BACFFF;
@@ -82,25 +82,6 @@
   <footer>AI Construction Summit 2026 · Stand gen+ · agente de voz edge · el ranking corre 100% local</footer>
 
   <script>
-  /* VISTA PREVIA: sin backend, el ranking se simula (en el stand viene de data/leaderboard.jsonl) */
-  (function(){
-    const players=[
-      {nombre:"María F.",empresa:"Constructora Andes",score:3,total:3},
-      {nombre:"Jorge L.",empresa:"Inmobiliaria Sur",score:2,total:3},
-      {nombre:"Valeria Q.",empresa:"Estudio VQ",score:2,total:3},
-      {nombre:"Renzo T.",empresa:"PUCP",score:1,total:3},
-      {nombre:"Carla M.",empresa:"Municipalidad de Lima",score:1,total:3}];
-    const real=window.fetch.bind(window);
-    window.fetch=function(u,o){
-      if(String(u).includes("/api/leaderboard")){
-        const hh=new Date().getHours();
-        return Promise.resolve(new Response(JSON.stringify({
-          hora:`${String(hh).padStart(2,"0")}:00–${String((hh+1)%24).padStart(2,"0")}:00`,
-          jugadores_hora:players.length, top:players}),{headers:{"Content-Type":"application/json"}}));
-      }
-      return real(u,o);
-    };
-  })();
   const $ = id => document.getElementById(id);
   const esc = s => (s == null ? '' : String(s)).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const MED = ['🥇','🥈','🥉'];

@@ -1,0 +1,20 @@
+# ── Edge Voice Agent · GEN+ ─────────────────────────────────────────────
+# Núcleo del servidor y pipeline de voz. Instálalo en un venv con Python 3.12.
+# (Piper y ETABS/visión se instalan aparte; ver docs de instalación.)
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20        # subida del audio del micrófono
+pyyaml==6.0.2                   # config.yaml
+httpx==0.28.1                   # cliente HTTP a Ollama y a gen-flows
+
+# --- STT local (offline, CUDA) ---
+faster-whisper==1.1.1           # arrastra ctranslate2 (CUDA) + av (ffmpeg embebido)
+numpy>=1.26,<3
+soundfile==0.13.1               # leer/escribir WAV
+
+# --- ETABS (solo Windows, COM) — opcional, no rompe si falta ---
+comtypes==1.4.8 ; sys_platform == "win32"
+
+# NOTA: Piper (TTS) se instala como binario/paquete aparte:  pip install piper-tts
+#       o descargando el ejecutable. El código degrada a voz del navegador si falta.

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GEN+ EDGE AI · Agente de Voz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/web/styles.css" />
+</head>
+<body>
+  <!-- ══ TOP BAR ══ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">GEN+</span>
+      <span class="brand-sub" id="brandSub">EDGE AI · AGENTE DE VOZ</span>
+    </div>
+    <div class="status-pills" id="statusPills">
+      <span class="pill" data-k="stt"><i></i> STT <b>—</b></span>
+      <span class="pill" data-k="llm"><i></i> LLM <b>—</b></span>
+      <span class="pill" data-k="tts"><i></i> TTS <b>—</b></span>
+      <span class="pill" data-k="flow"><i></i> Agent Flow <b>—</b></span>
+      <span class="pill" data-k="ram"><i></i> RAM <b id="ram">—</b></span>
+    </div>
+    <div class="top-actions">
+      <button class="ghost" id="btnClear">Limpiar</button>
+      <button class="ghost" id="btnMic" title="Permitir micrófono">🎙 Micrófono</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <!-- ══ COLUMNA CENTRAL ══ -->
+    <section class="center">
+      <div class="state-chip" id="stateChip">EN REPOSO</div>
+
+      <div class="orb-wrap">
+        <canvas id="orb"></canvas>
+        <div class="orb-glow" id="orbGlow"></div>
+      </div>
+
+      <button class="talk" id="btnTalk">
+        <span class="dot"></span> Hablar
+      </button>
+      <p class="hint" id="hint">Pulsa <b>Hablar</b> o toca un botón · o usa un ejemplo</p>
+
+      <!-- Botones de acción (chips) -->
+      <div class="chips" id="chips"></div>
+
+      <!-- Pipeline -->
+      <div class="pipeline" id="pipeline">
+        <span>MIC</span><em>›</em><span>WHISPER</span><em>›</em><span>GEMMA</span>
+        <em>›</em><span>AGENT FLOW</span><em>›</em><span>PIPER</span>
+      </div>
+    </section>
+
+    <!-- ══ PANEL DERECHO ══ -->
+    <aside class="side">
+      <div class="side-block">
+        <h3>Agentes</h3>
+        <div class="agents-live" id="agentsLive"></div>
+      </div>
+
+      <div class="side-block">
+        <h4 class="dim">En el catálogo · aún no en vivo</h4>
+        <ul class="catalog" id="catalog"></ul>
+      </div>
+
+      <div class="metrics" id="metrics"></div>
+
+      <div class="side-block">
+        <h4 class="dim">Transcripción</h4>
+        <div class="transcript" id="transcript"><p class="empty">Nadie ha hablado todavía.</p></div>
+      </div>
+
+      <div class="side-block">
+        <h4 class="dim">Ejecuciones</h4>
+        <div class="execs" id="execs"><p class="empty">Sin ejecuciones todavía.</p></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ══ FOOTER TELEMETRÍA ══ -->
+  <footer class="footer" id="footer">
+    <span id="footL">stt — · llm — · tts —</span>
+    <span id="footR">Edge AI para construcción · uptime <b id="uptime">00:00</b></span>
+  </footer>
+
+  <!-- Modal correo/lead -->
+  <div class="modal" id="leadModal" hidden>
+    <div class="modal-card">
+      <h3>Te envío tu informe</h3>
+      <label>Nombre <input id="leadNombre" type="text" placeholder="Tu nombre" /></label>
+      <label>Empresa <input id="leadEmpresa" type="text" placeholder="Tu empresa" /></label>
+      <label>Correo <input id="leadCorreo" type="email" placeholder="tucorreo@empresa.com" /></label>
+      <div class="modal-actions">
+        <button class="ghost" id="leadCancel">Cancelar</button>
+        <button class="primary" id="leadSend">Enviar informe</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/web/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+[
+  {
+    "texto": "¿Qué significa BIM en la industria de la construcción?",
+    "opciones": ["Building Information Modeling", "Basic Infrastructure Management", "Budget & Investment Model"],
+    "correcta": 0,
+    "explicacion": "BIM es Building Information Modeling: modelar el edificio con información, no solo geometría."
+  },
+  {
+    "texto": "Según la norma E.030, ¿cuál es la deriva máxima de entrepiso para concreto armado?",
+    "opciones": ["0.005", "0.007", "0.010"],
+    "correcta": 1,
+    "explicacion": "La E.030 fija 0.007 para concreto armado (Tabla N°11)."
+  },
+  {
+    "texto": "¿Qué hace un modelo de visión por computadora como VisionPro en una obra?",
+    "opciones": ["Cotiza materiales", "Detecta EPP y riesgos en video", "Firma contratos"],
+    "correcta": 1,
+    "explicacion": "Detecta cascos, chalecos y condiciones de seguridad en el video de las cámaras."
+  },
+  {
+    "texto": "¿Dónde corre un agente de IA 'edge' como el de este stand?",
+    "opciones": ["En la nube de un tercero", "En un equipo local, sin depender de internet", "En el celular del cliente"],
+    "correcta": 1,
+    "explicacion": "Edge = el modelo corre local (esta laptop o una Jetson), con baja latencia y sin internet."
+  },
+  {
+    "texto": "En el ecosistema GEN+ y AECODE, ¿cómo se reparten los roles?",
+    "opciones": ["AECODE forma y GEN+ implementa", "Son competidores", "Ambos solo capacitan"],
+    "correcta": 0,
+    "explicacion": "AECODE forma a la comunidad; GEN+ implementa la tecnología en las empresas."
+  }
+]

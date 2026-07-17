@@ -1,0 +1,25 @@
+# Entorno y modelos (NUNCA al repo — son pesados y/o secretos)
+.venv/
+venv/
+__pycache__/
+*.pyc
+models/
+data/voces/piper/*.onnx
+data/voces/piper/*.json
+*.log
+
+# Secretos
+.env
+*.secret
+config.local.yaml
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Salidas del stand (fotos de visitantes, informes generados, leads)
+data/salidas/
+data/leads/
+*.pdf

@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "norma": "E.030 Diseño Sismorresistente",
+    "version": "2018",
+    "fuente": "Valores de referencia de ingeniería estructural. VERIFICAR contra el PDF oficial RNE/SENCICO antes de uso en diseño real.",
+    "disclaimer": "Asistente referencial para demostración. No reemplaza al ingeniero estructural colegiado ni a la norma vigente.",
+    "confianza": "media-demo"
+  },
+  "zona_Z": {
+    "descripcion": "Factor de zona Z (Tabla N°1), fracción de g. Se asigna por distrito (Anexo).",
+    "valores": { "Z4": 0.45, "Z3": 0.35, "Z2": 0.25, "Z1": 0.10 },
+    "notas": "Z = aceleración máx. horizontal en suelo rígido con 10% de excedencia en 50 años. Costa=Z4, Selva=Z1."
+  },
+  "deriva_maxima": {
+    "descripcion": "Límite de distorsión de entrepiso Δi/hei (Tabla N°11).",
+    "por_material": {
+      "concreto armado": 0.007,
+      "acero": 0.010,
+      "albañileria": 0.005,
+      "albanileria": 0.005,
+      "madera": 0.010,
+      "muros de ductilidad limitada": 0.005
+    }
+  },
+  "categoria_uso_U": {
+    "descripcion": "Categoría de la edificación y factor de uso U (Tabla N°5).",
+    "valores": {
+      "A": { "U": 1.5, "tipo": "Edificaciones esenciales (hospitales, bomberos, comisarías). A1 en Z4/Z3 exige aislamiento sísmico." },
+      "B": { "U": 1.3, "tipo": "Edificaciones importantes (colegios, universidades, teatros, gran aforo)." },
+      "C": { "U": 1.0, "tipo": "Edificaciones comunes (viviendas, oficinas)." },
+      "D": { "U": null, "tipo": "Edificaciones temporales — análisis caso a caso." }
+    }
+  },
+  "suelos_S": {
+    "descripcion": "Factor de suelo S y periodos TP/TL por perfil (aprox., Tabla N°3/N°4).",
+    "perfiles": {
+      "S0": { "S": 0.80, "TP": 0.30, "TL": 3.0, "tipo": "Roca dura" },
+      "S1": { "S": 1.00, "TP": 0.40, "TL": 2.5, "tipo": "Roca / suelos muy rígidos" },
+      "S2": { "S": 1.15, "TP": 0.60, "TL": 2.0, "tipo": "Suelos intermedios" },
+      "S3": { "S": 1.20, "TP": 1.00, "TL": 1.6, "tipo": "Suelos blandos" }
+    },
+    "nota": "S y TP/TL dependen también de la zona; requieren Estudio de Mecánica de Suelos (EMS)."
+  },
+  "reduccion_R0": {
+    "descripcion": "Coeficiente básico de reducción R0 por sistema estructural (concreto armado).",
+    "valores": {
+      "porticos": 8,
+      "dual": 7,
+      "muros estructurales": 6,
+      "muros de ductilidad limitada": 4
+    },
+    "formula": "R = R0 · Ia · Ip   (Ia, Ip = factores de irregularidad en altura y planta)"
+  },
+  "espectro": {
+    "Sa": "Sa = (Z · U · C · S / R) · g",
+    "C": "C = 2.5 si T<TP ; 2.5·(TP/T) si TP<T<TL ; 2.5·(TP·TL/T²) si T>TL",
+    "nota": "C = factor de amplificación sísmica."
+  },
+  "corpus_consulta": [
+    { "articulo": "Tabla N°1", "tema": "zonas sísmicas factor Z", "texto": "El territorio nacional se divide en 4 zonas. El factor Z se interpreta como la aceleración máxima horizontal en suelo rígido con probabilidad de 10% de ser excedida en 50 años. Z4=0.45, Z3=0.35, Z2=0.25, Z1=0.10 (fracción de g)." },
+    { "articulo": "Art. 5.2 / Tabla N°11", "tema": "deriva límite distorsión entrepiso", "texto": "El máximo desplazamiento relativo de entrepiso no debe exceder: concreto armado 0.007, acero 0.010, albañilería 0.005, madera 0.010, muros de ductilidad limitada 0.005." },
+    { "articulo": "Tabla N°5", "tema": "categoria uso factor U", "texto": "Categoría A (esenciales) U=1.5; B (importantes) U=1.3; C (comunes) U=1.0; D (temporales) según criterio. Los hospitales son A; colegios y universidades son B; viviendas y oficinas son C." },
+    { "articulo": "Art. 3", "tema": "espectro pseudo aceleraciones", "texto": "La aceleración espectral se define como Sa = (Z·U·C·S/R)·g, donde C es el factor de amplificación sísmica que depende del periodo T y de los periodos TP y TL del perfil de suelo." },
+    { "articulo": "Art. 3.4 / Tabla N°7", "tema": "sistema estructural coeficiente reduccion R", "texto": "El coeficiente de reducción R = R0·Ia·Ip. Para concreto armado: pórticos R0=8, dual R0=7, muros R0=6, muros de ductilidad limitada R0=4. Ia e Ip penalizan irregularidades en altura y planta." }
+  ]
+}

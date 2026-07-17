@@ -1,0 +1,71 @@
+# ═══════════════════════════════════════════════════════════════════════
+#  GEN+ · Edge Voice Agent — configuración única del stand
+#  Cambia SOLO este archivo para adaptar el stand. Cada herramienta se
+#  enciende/apaga aquí sin tocar código (degradación elegante).
+# ═══════════════════════════════════════════════════════════════════════
+
+app:
+  host: "127.0.0.1"
+  port: 3040
+  title: "GEN+ EDGE AI · Agente de Voz"
+  subtitle: "Edge AI · construcción"
+
+# ── Cerebro local (Ollama + Gemma) ─────────────────────────────────────
+llm:
+  provider: "ollama"
+  base_url: "http://127.0.0.1:11434"
+  model: "gemma3:4b"
+  temperature: 0.5
+  num_ctx: 4096
+  max_tokens: 320          # respuestas cortas: es para hablar, no para leer
+
+# ── Voz a texto (STT) ──────────────────────────────────────────────────
+#  engine: whisper  → faster-whisper local en tu GPU (offline, ideal stand)
+#          browser  → usa el reconocimiento del navegador (0 instalación, necesita internet)
+#          off      → sin STT (solo botones)
+stt:
+  engine: "browser"        # ← arranca en 'browser' para probar HOY; cambia a 'whisper' cuando lo instales
+  model: "small"           # tiny | base | small | medium
+  device: "cuda"           # cuda | cpu | auto
+  compute_type: "int8_float16"
+  language: "es"
+
+# ── Texto a voz (TTS) — jerarquía anti-mudez ───────────────────────────
+#  auto → intenta iapetus (frase pregrabada) → piper (local) → browser
+tts:
+  engine: "auto"           # auto | iapetus | piper | browser | off
+  voice: "iapetus"
+  iapetus_dir: "data/voces/iapetus"
+  piper_exe: ""            # ruta a piper.exe (vacío = no instalado)
+  piper_model: ""          # ruta a la voz .onnx de Piper
+
+# ── Herramientas (cada una detrás de un flag) ──────────────────────────
+tools:
+  genplus:
+    enabled: true          # ¿Qué es gen+?
+  norma:
+    enabled: true          # E.030 (consultar / ¿cumple?) — datos demo, ver disclaimer
+    disclaimer: "Asistente referencial. No reemplaza al ingeniero estructural colegiado."
+  quiz:
+    enabled: true          # quiz IA + construcción con ranking
+  etabs:
+    enabled: false         # requiere ETABS 22 + Windows (COM). Si falta, se desactiva solo.
+  email:
+    enabled: false         # informe por correo (ÚNICA función que necesita internet)
+    smtp_host: ""
+    smtp_port: 587
+    smtp_user: ""
+    smtp_from: "GEN+ <ingenieria@genplusdesign.com>"
+    coordinator_cc: ""     # copia al coordinador del stand
+    destino_default: "emanuel.genplus@gmail.com"
+  vision:
+    enabled: false         # detección EPP (YOLO) — entorno aparte; ver docs
+    service_url: ""        # si corres el servicio de visión aparte, su URL
+
+# ── Orquestador gen-flows (opcional, SOLO acciones online) ─────────────
+#  El NÚCLEO no depende de esto. Se usa solo para registrar leads / disparar
+#  flujos en la plataforma real de GEN+ (VPS 187.77.250.111).
+agentflow:
+  enabled: false
+  webhook_url: ""
+  label: "gen-flows · 187.77.250.111"

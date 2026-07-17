@@ -2,7 +2,7 @@
 <html lang="es" data-theme="dark">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>gen+ · Edge AI · Agente de voz — vista previa</title>
+<title>gen+ · Agente del stand — vista previa</title>
 
 <style>
   /* ── Plus Jakarta Sans local (el stand es offline: nada de Google Fonts) ───── */
@@ -55,7 +55,7 @@
   .cap{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
 
   /* ── Estructura: header / escenario+rail / barra telemetría ────────────────── */
-  .app{display:grid;grid-template-rows:56px 1fr 40px;height:100vh}
+  .app{display:grid;grid-template-rows:56px 1fr;height:100vh}
 
   header{
     display:flex;align-items:center;justify-content:space-between;gap:24px;
@@ -70,10 +70,18 @@
     content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
     background:var(--gradient-brand);opacity:.55;pointer-events:none;
   }
-  .brand{display:flex;align-items:center;gap:16px}
+  .brand{display:flex;align-items:center;gap:14px}
   .brand img{height:22px;width:auto;display:block}      /* proporción intacta */
-  .brand .sep{width:1px;height:20px;background:var(--border)}
-  .brand .mod{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--text-secondary)}
+  /* Versión del producto: gradiente de marca, discreto y poderoso */
+  .brand .ver{
+    font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;
+    color:#fff;padding:3px 9px;border-radius:var(--radius-full);
+    background:var(--gradient-cta);box-shadow:0 0 14px rgba(59,110,255,.28)}
+  .brand .net{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--text-muted)}
+  .brand .net .led{width:6px;height:6px;border-radius:50%;background:var(--success);
+    box-shadow:0 0 8px rgba(25,195,86,.7);animation:led 2.6s ease-in-out infinite}
 
   .chips{display:flex;align-items:center;gap:8px}
   .chip{
@@ -118,6 +126,28 @@
   .mic-res .lvl i{display:block;height:100%;background:var(--blue-primary);width:0%;transition:width .3s ease}
   .mic-res.ok{border-color:#A8E6C1;background:var(--okB, #E6F9EE)}
   .mic-res.ok b{color:#0B7A34}
+
+  /* ── Panel Sistema (desplegable): la telemetría vive aquí, no a la vista ───── */
+  .sys-panel{position:fixed;top:64px;right:16px;z-index:50;width:420px;background:var(--surface);
+             border:1px solid var(--border-strong);border-radius:var(--radius-xl);
+             box-shadow:0 18px 42px rgba(0,0,0,.6);padding:16px;display:none}
+  .sys-panel.open{display:block}
+  .sys-panel h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+                color:var(--text-muted);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .sys-panel h3 .sys-sub{font-weight:600;letter-spacing:.04em;text-transform:none;opacity:.7}
+  .sys-panel h3 button{margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1}
+  .sys-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .sys-panel .telem{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:12px;
+                    border-top:1px solid var(--border);
+                    font-family:var(--font-mono);font-size:11px;color:var(--text-muted)}
+  .sys-panel .telem .l,.sys-panel .telem .r{display:flex;flex-wrap:wrap;gap:12px}
+  .sys-panel .telem b{color:var(--blue-medium);font-weight:600}
+  .sys-panel .telem .k{color:var(--text-muted)}
+  /* LED del botón Sistema: verde salvo que el cerebro o la conexión caigan */
+  #sys-led{background:var(--success)}
+  body:has(#c-llm.down) #sys-led,body:has(#c-ws.down) #sys-led{background:var(--danger)}
+  body:has(#c-ram.crit) #sys-led{background:var(--danger)}
+  body:has(#c-ram.warn) #sys-led{background:var(--warning)}
 
   main{display:grid;grid-template-columns:1fr 372px;min-height:0}
 
@@ -184,7 +214,12 @@
   .btn-hablar.rec .ico{animation:lat 1s ease-in-out infinite}
   @keyframes lat{50%{opacity:.35}}
 
-  .ejemplos{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  /* Funcionalidades organizadas por categoría (v4): filas con etiqueta */
+  .ejemplos{display:flex;flex-direction:column;gap:7px;align-items:center}
+  .ej-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .ej-tag{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+          color:rgba(143,176,255,.75);min-width:76px;text-align:right;padding-right:4px;
+          font-family:var(--font-mono)}
   /* Dentro del escenario oscuro: blancos translucidos, no los tokens light */
   .btn-ej{height:32px;padding:0 12px;font-size:12px;border-radius:var(--radius-sm);
           background:rgba(255,255,255,.07);color:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.16)}
@@ -246,6 +281,9 @@
         border-radius:var(--radius-lg);margin-bottom:6px}
   .card.live{border-color:var(--blue-primary);background:var(--blue-ice);
              box-shadow:var(--shadow-sm),0 0 18px rgba(59,110,255,.12)}
+  .vtag{font-family:var(--font-mono);font-size:9px;font-weight:600;color:var(--blue-pale);
+        background:rgba(77,132,255,.14);border:1px solid rgba(77,132,255,.3);
+        border-radius:var(--radius-xs);padding:1px 5px;margin-left:6px;vertical-align:1px}
   .card .n{font-size:13px;font-weight:600;line-height:18px}
   .card .s{font-size:11px;line-height:15px;color:var(--text-muted);margin-top:1px}
   .badge{font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:var(--radius-xs);white-space:nowrap}
@@ -274,29 +312,20 @@
   .st.ok{color:#0B7A34} .st.bad{color:#A81210} .st.wait{color:var(--blue-medium)}
   .empty{font-size:12px;color:var(--text-muted);padding:4px 0}
 
-  /* ── Barra de telemetría ───────────────────────────────────────────────────── */
-  .telem{display:flex;align-items:center;justify-content:space-between;gap:16px;
-         padding:0 24px;background:var(--surface-subtle);border-top:1px solid var(--border);
-         font-family:var(--font-mono);font-size:11px;color:var(--text-muted);overflow:hidden;white-space:nowrap}
-  .telem .l,.telem .r{display:flex;align-items:center;gap:18px}
-  .telem b{color:var(--blue-medium);font-weight:600}
-  .telem .k{color:var(--text-muted)}
+  /* (la telemetría vive dentro del panel Sistema; ver .sys-panel .telem) */
 </style>
 
 <div class="app">
   <header>
     <div class="brand">
       <img src="static/gen-logo-white.png" alt="gen+">
-      <span class="sep"></span>
-      <span class="mod">EDGE AI · AGENTE DE VOZ</span>
+      <span class="ver">v4.0</span>
+      <span class="net"><span class="led"></span>100% LOCAL</span>
     </div>
     <div class="chips" id="chips">
-      <span class="chip" id="c-stt"><span class="led"></span>STT <b>—</b></span>
-      <span class="chip" id="c-llm"><span class="led"></span>LLM <b>—</b></span>
-      <span class="chip" id="c-tts"><span class="led"></span>TTS <b>—</b></span>
-      <span class="chip" id="c-flow"><span class="led"></span>Agent Flow <b>—</b></span>
-      <span class="chip" id="c-ws"><span class="led"></span>UI</span>
-      <span class="chip ram" id="c-ram" title="RAM libre del equipo — el riesgo #1 del stand"><span class="led"></span>RAM <b id="ram-v">—</b></span>
+      <button class="chip kbtn" id="btn-sys" title="Estado del sistema">
+        <span class="led" id="sys-led"></span>Sistema
+      </button>
       <button class="chip kbtn" id="btn-full" title="Pantalla completa (modo stand)">⛶</button>
       <button class="chip kbtn" id="btn-limpiar" title="Limpiar pantalla entre visitantes">Limpiar</button>
       <button class="chip mic-btn" id="btn-mic" title="Configurar micrófono">
@@ -308,6 +337,33 @@
       </button>
     </div>
   </header>
+
+  <!-- Panel Sistema (desplegable): telemetría técnica fuera de la vista del visitante -->
+  <div class="sys-panel" id="sys-panel">
+    <h3>Sistema <span class="sys-sub">telemetría del equipo</span> <button id="sys-close" aria-label="Cerrar">✕</button></h3>
+    <div class="sys-chips">
+      <span class="chip" id="c-stt"><span class="led"></span>Oído <b>—</b></span>
+      <span class="chip" id="c-llm"><span class="led"></span>Cerebro <b>—</b></span>
+      <span class="chip" id="c-tts"><span class="led"></span>Voz <b>—</b></span>
+      <span class="chip" id="c-flow"><span class="led"></span>Agent Flow <b>—</b></span>
+      <span class="chip" id="c-ws"><span class="led"></span>Pantalla</span>
+      <span class="chip ram" id="c-ram" title="RAM libre del equipo"><span class="led"></span>RAM <b id="ram-v">—</b></span>
+    </div>
+    <div class="telem">
+      <div class="l">
+        <span><span class="k">oído</span> <b id="t-stt">—</b></span>
+        <span><span class="k">cerebro</span> <b id="t-llm">—</b></span>
+        <span><span class="k">flow</span> <b id="t-flow">—</b></span>
+        <span><span class="k">voz</span> <b id="t-tts">—</b></span>
+        <span><span class="k">total</span> <b id="t-total">—</b></span>
+      </div>
+      <div class="r">
+        <span id="t-stack" class="k">—</span>
+        <span><span class="k">destino</span> <b id="t-to">—</b></span>
+        <span><span class="k">uptime</span> <b id="t-up">00:00</b></span>
+      </div>
+    </div>
+  </div>
 
   <div class="modal-bg" id="em-modal">
     <div class="modal">
@@ -388,37 +444,52 @@
           <span class="ico"></span><span id="btn-hablar-t">Hablar</span>
         </button>
         <div class="ejemplos" id="ejemplos">
-          <button class="gen-button btn-ej" data-cool="20000"
-                  data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
-            Enviar un correo</button>
-          <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
-          <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
-          <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
-          <button class="gen-button btn-ej" data-t="prende las luces">Prender luces</button>
-          <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz</button>
-          <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio ETABS</button>
-          <button class="gen-button btn-ej" data-t="cumple las derivas">¿Cumple la norma?</button>
-          <button class="gen-button btn-ej" data-cool="10000" data-t="según la norma, ¿cuál es la deriva máxima en concreto armado?">Consultar la norma</button>
-          <button class="gen-button btn-ej" data-cool="60000" data-t="envíame el informe del edificio">Informe a mi correo</button>
-          <button class="gen-button btn-ej" data-t="¿qué temperatura hace en lima?">Clima en Lima</button>
-          <button class="gen-button btn-ej" data-cool="15000" data-t="activa la cámara de detección">Detección en vivo</button>
-          <button class="gen-button btn-ej" data-cool="12000" data-t="¿qué ves?">¿Qué ves?</button>
-          <button class="gen-button btn-ej" data-cool="10000" data-t="abre la ciudad">Ciudad 3D</button>
-          <button class="gen-button btn-ej" data-cool="10000" data-t="abre el edificio de ainy">Edificio Ainy</button>
-          <button class="gen-button btn-ej" data-t="desintégrate">Desintégrate</button>
-          <button class="gen-button btn-ej" data-t="cambia de color">Cambia de color</button>
+          <div class="ej-group">
+            <span class="ej-tag">Conversa</span>
+            <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
+            <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
+            <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz con ranking</button>
+            <button class="gen-button btn-ej" data-cool="20000"
+                    data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
+              Enviar un correo</button>
+          </div>
+          <div class="ej-group">
+            <span class="ej-tag">Ingeniería</span>
+            <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio en vivo</button>
+            <button class="gen-button btn-ej" data-t="cumple las derivas">¿Cumple la norma?</button>
+            <button class="gen-button btn-ej" data-cool="10000" data-t="según la norma, ¿cuál es la deriva máxima en concreto armado?">Consultar la norma</button>
+            <button class="gen-button btn-ej" data-cool="60000" data-t="envíame el informe del edificio">Informe a mi correo</button>
+          </div>
+          <div class="ej-group">
+            <span class="ej-tag">Visión</span>
+            <button class="gen-button btn-ej" data-cool="15000" data-t="activa la cámara de detección">Detección en vivo</button>
+            <button class="gen-button btn-ej" data-cool="12000" data-t="¿qué ves?">¿Qué ves?</button>
+            <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
+          </div>
+          <div class="ej-group">
+            <span class="ej-tag">Mundo 3D</span>
+            <button class="gen-button btn-ej" data-cool="10000" data-t="abre la ciudad">Ciudad 3D</button>
+            <button class="gen-button btn-ej" data-cool="10000" data-t="abre el edificio de ainy">Edificio Ainy</button>
+          </div>
+          <div class="ej-group">
+            <span class="ej-tag">Efectos</span>
+            <button class="gen-button btn-ej" data-t="¿qué temperatura hace en lima?">Clima en Lima</button>
+            <button class="gen-button btn-ej" data-t="prende las luces">Luces</button>
+            <button class="gen-button btn-ej" data-t="desintégrate">Desintégrate</button>
+            <button class="gen-button btn-ej" data-t="cambia de color">Cambia de color</button>
+          </div>
         </div>
-        <div class="hint-k">Pulsa <b>Hablar</b> y di tu pedido · o usa un ejemplo · <kbd>Enter</kbd> también funciona</div>
+        <div class="hint-k">Pulsa <b>Hablar</b> y di tu pedido — o toca una opción</div>
       </div>
 
       <div class="pipe" id="pipe">
-        <span class="node" data-s="mic">MIC</span><span class="arrow">→</span>
-        <span class="node" data-s="stt">WHISPER<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="router">ROUTER<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="llm">GEMMA<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="flow">AGENT FLOW<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="etabs">ETABS<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="tts">PIPER<span class="ms"></span></span>
+        <span class="node" data-s="mic">ESCUCHA</span><span class="arrow">→</span>
+        <span class="node" data-s="stt">ENTIENDE<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="router">DECIDE<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="llm">RAZONA<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="flow">CONECTA<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="etabs">CALCULA<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="tts">HABLA<span class="ms"></span></span>
       </div>
     </div>
 
@@ -427,11 +498,11 @@
         <h2 class="cap">Agentes</h2>
         <div class="scroll">
           <div class="card live">
-            <div><div class="n">Correo</div><div class="s">Agent Flow · gen-flows · webhook</div></div>
+            <div><div class="n">Correo <span class="vtag">v2.1</span></div><div class="s">Te envía el informe a tu email al instante</div></div>
             <span class="badge on">EN VIVO</span>
           </div>
           <div class="card live">
-            <div><div class="n">ETABS · Edificio gen+</div><div class="s">2–8 pisos por voz · sismo E.030 · derivas · COM</div></div>
+            <div><div class="n">Edificio en vivo <span class="vtag">v1.3</span></div><div class="s">Modela de 2 a 8 pisos por voz y verifica la norma sísmica</div></div>
             <span class="badge on">EN VIVO</span>
           </div>
 
@@ -466,21 +537,6 @@
       </section>
     </aside>
   </main>
-
-  <div class="telem">
-    <div class="l">
-      <span><span class="k">stt</span> <b id="t-stt">—</b></span>
-      <span><span class="k">llm</span> <b id="t-llm">—</b></span>
-      <span><span class="k">flow</span> <b id="t-flow">—</b></span>
-      <span><span class="k">tts</span> <b id="t-tts">—</b></span>
-      <span><span class="k">total</span> <b id="t-total">—</b></span>
-    </div>
-    <div class="r">
-      <span id="t-stack" class="k">—</span>
-      <span><span class="k">destino</span> <b id="t-to">—</b></span>
-      <span><span class="k">uptime</span> <b id="t-up">00:00</b></span>
-    </div>
-  </div>
 </div>
 
 <style>
@@ -1473,5 +1529,58 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     } finally { b.disabled = false; b.textContent = 'Exportar PDF'; }
   }
+</script>
+
+<style>
+  /* ═══ v4 UX (17-jul): HUD tech + paneles desplegables — capa ADITIVA ═══════ */
+
+  /* Brackets HUD en las esquinas del escenario: firma tecnológica sobria */
+  .stage::before{content:"";position:absolute;inset:14px;pointer-events:none;opacity:.4;
+    background:
+      linear-gradient(var(--blue-light),var(--blue-light)) left 0 top 0/20px 1px,
+      linear-gradient(var(--blue-light),var(--blue-light)) left 0 top 0/1px 20px,
+      linear-gradient(var(--blue-light),var(--blue-light)) right 0 top 0/20px 1px,
+      linear-gradient(var(--blue-light),var(--blue-light)) right 0 top 0/1px 20px,
+      linear-gradient(var(--blue-light),var(--blue-light)) left 0 bottom 0/20px 1px,
+      linear-gradient(var(--blue-light),var(--blue-light)) left 0 bottom 0/1px 20px,
+      linear-gradient(var(--blue-light),var(--blue-light)) right 0 bottom 0/20px 1px,
+      linear-gradient(var(--blue-light),var(--blue-light)) right 0 bottom 0/1px 20px;
+    background-repeat:no-repeat}
+
+  /* Rail con secciones desplegables (chevron en cada título) */
+  .rail{display:flex !important;flex-direction:column}
+  .rail section{flex:none;display:flex;flex-direction:column;min-height:0}
+  .rail section.grow{flex:1}
+  .rail section.closed{flex:none !important}
+  .rail section.closed > :not(h2){display:none !important}
+  .rail section:first-of-type .scroll{max-height:32vh}
+  h2.cap.tgl{cursor:pointer;display:flex;align-items:center;user-select:none;
+    transition:color 160ms ease}
+  h2.cap.tgl:hover{color:var(--blue-pale)}
+  .tgl .chev{margin-left:auto;font-size:10px;color:var(--text-muted);
+    transition:transform 200ms ease}
+  section.closed .tgl .chev{transform:rotate(-90deg)}
+</style>
+<script>
+  /* v4 UX: panel Sistema + secciones desplegables (capa aditiva, no toca el core) */
+  (function () {
+    var sys = document.getElementById('sys-panel');
+    var btn = document.getElementById('btn-sys');
+    if (btn && sys) {
+      btn.onclick = function () { sys.classList.toggle('open'); };
+      var x = document.getElementById('sys-close');
+      if (x) x.onclick = function () { sys.classList.remove('open'); };
+    }
+    document.querySelectorAll('.rail section').forEach(function (sec) {
+      var h = sec.querySelector('h2.cap');
+      if (!h) return;
+      if (sec.querySelector('#tr') || sec.querySelector('#execs')) sec.classList.add('grow');
+      h.classList.add('tgl');
+      var c = document.createElement('span');
+      c.className = 'chev'; c.textContent = '▾';
+      h.appendChild(c);
+      h.addEventListener('click', function () { sec.classList.toggle('closed'); });
+    });
+  })();
 </script>
 </html>

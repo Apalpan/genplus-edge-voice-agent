@@ -2,7 +2,7 @@
 <html lang="es" data-theme="dark">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>gen+ · Agente del stand — vista previa</title>
+<title>gen+ · Agente del stand — vista previa v5.0</title>
 
 <style>
   /* ── Plus Jakarta Sans local (el stand es offline: nada de Google Fonts) ───── */
@@ -319,7 +319,7 @@
   <header>
     <div class="brand">
       <img src="static/gen-logo-white.png" alt="gen+">
-      <span class="ver">v4.0</span>
+      <span class="ver">v5.0</span>
       <span class="net"><span class="led"></span>100% LOCAL</span>
     </div>
     <div class="chips" id="chips">
@@ -404,6 +404,7 @@
   <main>
     <div class="stage">
       <div class="grid-bg"></div>
+      <div class="scan"></div>
       <div class="estado"><span class="pill" id="pill">EN REPOSO</span></div>
       <div id="attract-badge"><span class="wave">👋</span><span id="attract-txt">Acércate y háblame</span></div>
       <div id="clima-card">
@@ -433,7 +434,14 @@
         <div id="norma-a">Consultando la norma…</div>
         <div id="norma-src"></div>
       </div>
-      <canvas id="orb"></canvas>
+      <div class="orb-shell">
+        <div class="orb-halo"></div>
+        <div class="orb-ring r1"></div>
+        <div class="orb-ring r2"></div>
+        <div class="orb-ring r3"></div>
+        <div class="orb-pulse"></div>
+        <canvas id="orb"></canvas>
+      </div>
       <div class="caption">
         <div class="you" id="you"></div>
         <div class="agent"><span id="agent"></span><span id="voz"></span></div>
@@ -444,8 +452,15 @@
           <span class="ico"></span><span id="btn-hablar-t">Hablar</span>
         </button>
         <div class="ejemplos" id="ejemplos">
-          <div class="ej-group">
-            <span class="ej-tag">Conversa</span>
+          <div class="ej-tabs" id="ej-tabs" role="tablist" aria-label="Categorías">
+            <button class="ej-tab on" data-cat="conversa">Conversa</button>
+            <button class="ej-tab" data-cat="ingenieria">Ingeniería</button>
+            <button class="ej-tab" data-cat="vision">Visión</button>
+            <button class="ej-tab" data-cat="mundo3d">Mundo 3D</button>
+            <button class="ej-tab" data-cat="efectos">Efectos</button>
+            <button class="ej-tab" data-cat="apps">Apps gen+</button>
+          </div>
+          <div class="ej-panel on" data-cat="conversa">
             <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
             <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
             <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz con ranking</button>
@@ -453,33 +468,34 @@
                     data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
               Enviar un correo</button>
           </div>
-          <div class="ej-group">
-            <span class="ej-tag">Ingeniería</span>
+          <div class="ej-panel" data-cat="ingenieria">
             <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio en vivo</button>
             <button class="gen-button btn-ej" data-t="cumple las derivas">¿Cumple la norma?</button>
             <button class="gen-button btn-ej" data-cool="10000" data-t="según la norma, ¿cuál es la deriva máxima en concreto armado?">Consultar la norma</button>
             <button class="gen-button btn-ej" data-cool="60000" data-t="envíame el informe del edificio">Informe a mi correo</button>
           </div>
-          <div class="ej-group">
-            <span class="ej-tag">Visión</span>
+          <div class="ej-panel" data-cat="vision">
             <button class="gen-button btn-ej" data-cool="15000" data-t="activa la cámara de detección">Detección en vivo</button>
             <button class="gen-button btn-ej" data-cool="12000" data-t="¿qué ves?">¿Qué ves?</button>
             <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
           </div>
-          <div class="ej-group">
-            <span class="ej-tag">Mundo 3D</span>
+          <div class="ej-panel" data-cat="mundo3d">
             <button class="gen-button btn-ej" data-cool="10000" data-t="abre la ciudad">Ciudad 3D</button>
             <button class="gen-button btn-ej" data-cool="10000" data-t="abre el edificio de ainy">Edificio Ainy</button>
           </div>
-          <div class="ej-group">
-            <span class="ej-tag">Efectos</span>
+          <div class="ej-panel" data-cat="efectos">
             <button class="gen-button btn-ej" data-t="¿qué temperatura hace en lima?">Clima en Lima</button>
             <button class="gen-button btn-ej" data-t="prende las luces">Luces</button>
             <button class="gen-button btn-ej" data-t="desintégrate">Desintégrate</button>
             <button class="gen-button btn-ej" data-t="cambia de color">Cambia de color</button>
           </div>
+          <div class="ej-panel" data-cat="apps">
+            <a class="btn-app" href="leaderboard.html" target="_blank" rel="noopener">Ranking del día</a>
+            <a class="btn-app" href="https://apalpan.github.io/gen-plus-ai-process/" target="_blank" rel="noopener">AI Process <span class="ext">↗</span></a>
+            <a class="btn-app" href="https://apalpan.github.io/aecode-visionpro-live/" target="_blank" rel="noopener">VisionPro en vivo <span class="ext">↗</span></a>
+            <a class="btn-app" href="https://apalpan.github.io/aecode-visionpro-computervision-lab/" target="_blank" rel="noopener">Visión computacional <span class="ext">↗</span></a>
+          </div>
         </div>
-        <div class="hint-k">Pulsa <b>Hablar</b> y di tu pedido — o toca una opción</div>
       </div>
 
       <div class="pipe" id="pipe">
@@ -537,6 +553,7 @@
       </section>
     </aside>
   </main>
+  <button id="rail-tgl" title="Mostrar / ocultar panel" aria-label="Panel lateral"><span class="chev">⟩</span></button>
 </div>
 
 <style>
@@ -1581,6 +1598,138 @@
       h.appendChild(c);
       h.addEventListener('click', function () { sec.classList.toggle('closed'); });
     });
+  })();
+</script>
+
+<style>
+  /* ═══ v5 UX (17-jul): minimal + orbe protagonista — capa ADITIVA ══════════════
+     Los 17 botones ya no compiten con el orbe: filtros por categoría (uno a la vez),
+     el panel derecho se esconde con un botón, y el orbe gana aros HUD reactivos. */
+  :root{--rail-w:372px}
+
+  /* El orbe crece: es el protagonista (orb.js re-rasteriza vía ResizeObserver) */
+  canvas#orb{width:min(50vmin,470px);height:min(50vmin,470px)}
+
+  /* ── Filtros de acciones: segmented control, solo la categoría activa ──────── */
+  .ej-tabs{display:inline-flex;gap:2px;padding:3px;border-radius:var(--radius-full);
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
+  .ej-tab{height:28px;padding:0 13px;border:none;border-radius:var(--radius-full);cursor:pointer;
+    font:600 11.5px var(--font-jakarta);letter-spacing:.02em;color:rgba(255,255,255,.6);
+    background:transparent;transition:color 160ms ease,background-color 160ms ease}
+  .ej-tab:hover{color:#fff}
+  .ej-tab:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring)}
+  .ej-tab.on{background:var(--gradient-cta);color:#fff;box-shadow:0 0 14px rgba(59,110,255,.3)}
+  .ej-panel{display:none;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .ej-panel.on{display:flex;animation:panelIn 240ms cubic-bezier(.2,.9,.3,1)}
+  @keyframes panelIn{from{opacity:0;transform:translateY(4px)}}
+  .btn-app{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;
+    border-radius:var(--radius-sm);text-decoration:none;font:500 12px var(--font-jakarta);
+    background:rgba(255,255,255,.07);color:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.16);
+    transition:background-color .2s,border-color .2s,color .2s,transform .15s}
+  .btn-app:hover{background:rgba(77,132,255,.18);border-color:rgba(77,132,255,.45);color:#fff;transform:translateY(-1px)}
+  .btn-app .ext{font-size:10px;color:var(--blue-pale);opacity:.8}
+
+  /* Pipeline: casi invisible en reposo, despierta cuando el agente trabaja */
+  .pipe{opacity:.42;transition:opacity .5s ease}
+  .pipe:has(.node.on),.pipe:has(.node.done){opacity:1}
+
+  /* ── Panel derecho: esconder / abrir con un botón en el borde ──────────────── */
+  main{transition:grid-template-columns 360ms cubic-bezier(.2,.9,.3,1)}
+  .rail{overflow:hidden;min-width:0}
+  body.rail-off main{grid-template-columns:1fr 0px}
+  body.rail-off .rail{border-left-color:transparent}
+  #rail-tgl{position:fixed;top:50%;right:var(--rail-w);transform:translateY(-50%);z-index:30;
+    width:20px;height:64px;border:1px solid var(--border);border-right:none;
+    border-radius:8px 0 0 8px;cursor:pointer;color:var(--text-muted);
+    background:rgba(6,20,42,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    display:flex;align-items:center;justify-content:center;padding:0;
+    transition:right 360ms cubic-bezier(.2,.9,.3,1),color 160ms ease,background-color 160ms ease}
+  #rail-tgl:hover{color:#fff;background:rgba(77,132,255,.25)}
+  #rail-tgl:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring)}
+  #rail-tgl .chev{font-size:11px;line-height:1;transition:transform 360ms ease}
+  body.rail-off #rail-tgl{right:0}
+  body.rail-off #rail-tgl .chev{transform:rotate(180deg)}
+
+  /* ── Orbe: halo que respira + aro de ticks + arco cometa + órbita con satélites ─ */
+  .orb-shell{position:relative;flex:none;display:grid;place-items:center}
+  .orb-shell > *{grid-area:1/1}
+  .orb-halo,.orb-ring,.orb-pulse{pointer-events:none;border-radius:50%;aspect-ratio:1}
+  .orb-halo{width:128%;
+    background:radial-gradient(circle,rgba(33,101,255,.15) 0%,rgba(33,101,255,.05) 45%,transparent 68%);
+    animation:haloB 6.5s ease-in-out infinite}
+  @keyframes haloB{50%{opacity:.55;transform:scale(1.05)}}
+  .orb-ring{opacity:.5;transition:opacity .6s ease,filter .6s ease}
+  .orb-ring.r1{width:103%;
+    background:repeating-conic-gradient(rgba(122,168,255,.55) 0deg .7deg,transparent .7deg 6deg);
+    -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
+            mask:radial-gradient(closest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
+    animation:spin 90s linear infinite}
+  .orb-ring.r2{width:111%;
+    background:conic-gradient(from 210deg,transparent 0 290deg,rgba(77,132,255,.04) 298deg,
+      rgba(77,132,255,.75) 342deg,#BACFFF 357deg,transparent 360deg);
+    -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 1.5px));
+            mask:radial-gradient(closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 1.5px));
+    animation:spin 14s linear infinite}
+  .orb-ring.r3{width:120%;border:1px solid rgba(122,168,255,.14);position:relative;
+    animation:spin 46s linear infinite reverse}
+  .orb-ring.r3::before,.orb-ring.r3::after{content:"";position:absolute;border-radius:50%;
+    background:#8FB0FF;box-shadow:0 0 10px rgba(143,176,255,.9)}
+  .orb-ring.r3::before{width:5px;height:5px;top:-3px;left:50%;margin-left:-2.5px}
+  .orb-ring.r3::after{width:3px;height:3px;bottom:6%;right:6%;opacity:.7}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* Pulso que emana del orbe mientras habla o ejecuta */
+  .orb-pulse{width:100%;border:1.5px solid rgba(109,149,255,.55);opacity:0}
+  .stage:has(#pill[data-s="speaking"]) .orb-pulse,
+  .stage:has(#pill[data-s="executing"]) .orb-pulse{animation:orbPulse 1.6s ease-out infinite}
+  @keyframes orbPulse{0%{opacity:.65;transform:scale(.98)}100%{opacity:0;transform:scale(1.22)}}
+  /* Los aros despiertan con el agente (sin reiniciar el giro: solo luz) */
+  .stage:has(#pill[data-s="listening"]) .orb-ring,
+  .stage:has(#pill[data-s="transcribing"]) .orb-ring,
+  .stage:has(#pill[data-s="thinking"]) .orb-ring,
+  .stage:has(#pill[data-s="speaking"]) .orb-ring,
+  .stage:has(#pill[data-s="executing"]) .orb-ring{opacity:.95;filter:brightness(1.35)}
+
+  /* ── Detalles sutiles en toda la página ────────────────────────────────────── */
+  /* Barrido de luz vertical, apenas perceptible */
+  .scan{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .scan::before{content:"";position:absolute;left:0;right:0;top:0;height:140px;
+    background:linear-gradient(180deg,transparent,rgba(77,132,255,.045) 50%,transparent);
+    transform:translateY(-160px);animation:scanY 15s linear infinite}
+  @keyframes scanY{to{transform:translateY(110vh)}}
+  /* El hairline de marca del header respira lentamente */
+  header::after{background-size:220% 100%;animation:hairShift 22s linear infinite}
+  @keyframes hairShift{to{background-position:-220% 0}}
+  /* Chips del header con lift al pasar */
+  .chip{transition:background-color 160ms ease,color 160ms ease,transform 160ms ease,border-color 160ms ease}
+  .kbtn:hover,.mic-btn:hover{transform:translateY(-1px)}
+  /* Tick de marca en los títulos del panel */
+  h2.cap.tgl::before{content:"";width:3px;height:10px;border-radius:2px;
+    background:var(--gradient-cta);margin-right:8px;flex:none;opacity:.85}
+  /* Métricas del stand con vida */
+  .sstat{transition:border-color 200ms ease,transform 200ms ease}
+  .sstat:hover{border-color:rgba(77,132,255,.4);transform:translateY(-1px)}
+  /* El badge EN VIVO respira */
+  .badge.on{box-shadow:0 0 12px rgba(33,101,255,.28);animation:badgeGlow 3.2s ease-in-out infinite}
+  @keyframes badgeGlow{50%{box-shadow:0 0 18px rgba(33,101,255,.45)}}
+
+  @media (prefers-reduced-motion:reduce){
+    .orb-ring,.orb-halo,.orb-pulse,.scan::before,header::after,.badge.on{animation:none !important}
+  }
+</style>
+<script>
+  /* v5 UX: filtros de acciones + panel derecho ocultable (capa aditiva) */
+  (function () {
+    var tabs = document.querySelectorAll('.ej-tab');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.classList.toggle('on', x === t); });
+        document.querySelectorAll('.ej-panel').forEach(function (p) {
+          p.classList.toggle('on', p.dataset.cat === t.dataset.cat);
+        });
+      });
+    });
+    var tgl = document.getElementById('rail-tgl');
+    if (tgl) tgl.onclick = function () { document.body.classList.toggle('rail-off'); };
   })();
 </script>
 </html>

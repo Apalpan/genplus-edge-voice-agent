@@ -49,7 +49,8 @@ tools:
   quiz:
     enabled: true          # quiz IA + construcción con ranking
   etabs:
-    enabled: false         # requiere ETABS 22 + Windows (COM). Si falta, se desactiva solo.
+    enabled: true          # sin ETABS instalado responde con simulación ETIQUETADA;
+                           # con ETABS 22 abierto (Windows/COM) usa el modelo real.
   email:
     enabled: false         # informe por correo (ÚNICA función que necesita internet)
     smtp_host: ""

@@ -39,7 +39,9 @@ _history: list[dict] = []
 
 @app.get("/")
 def index() -> FileResponse:
-    return FileResponse(WEB / "index.html")
+    # index.html vive en la RAÍZ del repo: el mismo archivo sirve para FastAPI
+    # (local, backend real) y para GitHub Pages (estático, modo demo).
+    return FileResponse(ROOT / "index.html")
 
 
 @app.get("/api/status")

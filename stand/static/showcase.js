@@ -71,6 +71,18 @@
     await userTurn(text);
     const t = norm(text);
 
+    const appMatch = [
+      [/ai process/, "AI Process"],
+      [/trainer ?math|matematic/, "TrainerMath"],
+      [/vision ?pro|vision computacional/, "VisionPro"],
+      [/state of ai|estado de la ia/, "State of AI in AEC"],
+      [/summit/, "AI Construction Summit"],
+    ].find(([pattern]) => pattern.test(t));
+    if (appMatch && /abre|muestra|entra|llevame/.test(t)) {
+      emit("app_open", { ok: true, label: appMatch[1] }, "executing");
+      return agentSay(`${appMatch[1]} está disponible en la pestaña Ecosistema. En la aplicación local también lo abro directamente por voz.`);
+    }
+
     if (/agent ?flow|agenda|centro de operaciones|publicidad/.test(t)) {
       emit("agentflow", { phase: "start", agent: "Genbot Voice Gateway" }, "thinking");
       await sleep(900);
@@ -218,7 +230,7 @@
         setTimeout(() => {
           stats.correos++;
           emit("exec_result", { ok: true, run_id: "demo-" + Math.random().toString(36).slice(2, 8) });
-          agentSay("Enviado. Revisa tu bandeja: llega con la marca de gen+, disparado por Agent Flow.");
+          agentSay("Simulación completada. En la computadora del stand, AgentFlow sí entrega el correo y muestra su identificador de ejecución.");
         }, 900);
       } else if (m.cmd === "email_cancel") {
         pendingEmail = null;

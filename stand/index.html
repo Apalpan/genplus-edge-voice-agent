@@ -1,0 +1,1477 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>gen+ · Edge AI · Agente de voz — vista previa</title>
+
+<style>
+  /* ── Plus Jakarta Sans local (el stand es offline: nada de Google Fonts) ───── */
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Medium.woff2") format("woff2");font-weight:500;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:block}
+
+  /* ── Tokens GEN+ Design System (DESIGN.md §11, tema DARK consolidado) ────────
+     17-jul: se funden aquí el bloque light original y el parche dark del 16-jul
+     (pedido de Emanuel). Una sola fuente de verdad; un solo lienzo navy. */
+  :root{
+    --font-jakarta:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
+    --font-mono:Menlo,Consolas,ui-monospace,monospace;
+
+    /* Rampa azul de marca (DESIGN.md §4). pale/medium/ice retonados para navy. */
+    --blue-primary:#2165FF; --blue-bright:#1E5CE8; --blue-light:#4D84FF; --blue-sky:#6A98FF;
+    --blue-deep-navy:#0E2A6B; --blue-dark:#12388C;
+    --blue-pale:#8FB0FF; --blue-medium:#9DB9FF; --blue-ice:rgba(77,132,255,.14);
+
+    --background:#040F20; --surface:#06142A; --surface-subtle:#0A1D3D; --surface-raised:#0A244C;
+    --border:rgba(122,168,255,.15); --border-strong:rgba(122,168,255,.34);
+    --text-primary:#EAF0FF; --text-secondary:#B9C7E4; --text-muted:#7E93BC;
+    --primary:#2165FF; --primary-hover:#1E5CE8; --focus-ring:rgba(109,149,255,.4);
+    --success:#19C356; --warning:#EED611; --danger:#EE1211;
+
+    /* Marca: gradiente oficial (DESIGN.md §4) + CTA + glow sobrio */
+    --gradient-brand:linear-gradient(165deg,#0E2A6B 0%,#12388C 20%,#1748B5 40%,#1E5CE8 60%,#2165FF 80%,#4D84FF 100%);
+    --gradient-cta:linear-gradient(135deg,#1E5CE8 0%,#4D84FF 100%);
+    --glow-primary:0 0 24px rgba(59,110,255,.32);
+
+    /* Escenario del orbe: la mezcla aditiva de las particulas pide navy profundo. */
+    --stage-bg:#040F20; --stage-glow:#07193a;
+    --stage-fg:#FFFFFF; --stage-fg-2:rgba(255,255,255,.58);
+
+    --radius-xs:4px; --radius-sm:8px; --radius-md:10px; --radius-lg:12px; --radius-xl:16px; --radius-full:999px;
+    --shadow-sm:0 2px 8px rgba(0,0,0,.35);
+    --shadow-md:0 12px 28px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--background); color:var(--text-primary);
+    font-family:var(--font-jakarta); font-weight:400;
+    height:100vh; overflow:hidden;
+    font-variant-numeric:tabular-nums;
+  }
+  .mono{font-family:var(--font-mono)}
+  .cap{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
+
+  /* ── Estructura: header / escenario+rail / barra telemetría ────────────────── */
+  .app{display:grid;grid-template-rows:56px 1fr 40px;height:100vh}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+    position:relative;z-index:20;
+    padding:0 24px;border-bottom:1px solid var(--border);
+    background:rgba(6,20,42,.78);
+    backdrop-filter:blur(18px) saturate(1.3);
+    -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  }
+  /* Hairline de marca bajo el header: la firma visual gen+ sin gritar */
+  header::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+    background:var(--gradient-brand);opacity:.55;pointer-events:none;
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand img{height:22px;width:auto;display:block}      /* proporción intacta */
+  .brand .sep{width:1px;height:20px;background:var(--border)}
+  .brand .mod{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--text-secondary)}
+
+  .chips{display:flex;align-items:center;gap:8px}
+  .chip{
+    display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;
+    background:var(--surface-subtle);border:1px solid var(--border);border-radius:var(--radius-full);
+    font-size:11px;font-weight:600;color:var(--text-secondary);white-space:nowrap;
+  }
+  .chip .led{width:6px;height:6px;border-radius:50%;background:var(--text-muted);flex:none}
+  .chip.up .led{background:var(--success)}
+  .chip.down .led{background:var(--danger)}
+  .chip b{color:var(--text-primary);font-weight:600}
+  .mic-btn{cursor:pointer;font-family:var(--font-jakarta);color:var(--blue-medium);
+           border-color:var(--blue-pale);background:var(--blue-ice)}
+  .mic-btn:hover{background:#dbe7ff}
+
+  /* ── Panel de micrófono ─────────────────────────────────────────────────────── */
+  .mic-panel{position:fixed;top:64px;right:16px;z-index:50;width:360px;background:var(--surface);
+             border:1px solid var(--border);border-radius:var(--radius-xl);
+             box-shadow:0 18px 42px rgba(16,49,124,.14);padding:16px;display:none}
+  .mic-panel.open{display:block}
+  .mic-panel h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+                color:var(--text-muted);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+  .mic-panel h3 button{border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1}
+  .mic-list{max-height:220px;overflow-y:auto;margin:0 -4px;padding:0 4px}
+  .mic-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border);
+            border-radius:var(--radius-md);margin-bottom:6px;cursor:pointer;font-size:12.5px;color:var(--text-secondary)}
+  .mic-item:hover{background:var(--surface-subtle)}
+  .mic-item.sel{border-color:var(--blue-primary);background:var(--blue-ice);color:var(--text-primary)}
+  .mic-item .radio{width:12px;height:12px;border-radius:50%;border:2px solid var(--border-strong);flex:none}
+  .mic-item.sel .radio{border-color:var(--blue-primary);background:var(--blue-primary);box-shadow:inset 0 0 0 2.5px #fff}
+  .mic-item .api{margin-left:auto;font-family:var(--font-mono);font-size:9.5px;color:var(--text-muted);white-space:nowrap}
+  .mic-test{display:flex;gap:8px;margin-top:10px}
+  .mic-test button{flex:1;height:36px;border:none;border-radius:var(--radius-md);cursor:pointer;
+                   font-family:var(--font-jakarta);font-weight:600;font-size:13px;
+                   background:var(--blue-primary);color:#fff}
+  .mic-test button:hover:not(:disabled){background:var(--primary-hover)}
+  .mic-test button:disabled{opacity:.55;cursor:wait}
+  .mic-res{margin-top:10px;padding:10px 12px;border-radius:var(--radius-md);font-size:12px;line-height:17px;
+           background:var(--surface-subtle);border:1px solid var(--border);color:var(--text-secondary);display:none}
+  .mic-res.show{display:block}
+  .mic-res .lvl{height:6px;border-radius:99px;background:var(--border);overflow:hidden;margin:7px 0 3px}
+  .mic-res .lvl i{display:block;height:100%;background:var(--blue-primary);width:0%;transition:width .3s ease}
+  .mic-res.ok{border-color:#A8E6C1;background:var(--okB, #E6F9EE)}
+  .mic-res.ok b{color:#0B7A34}
+
+  main{display:grid;grid-template-columns:1fr 372px;min-height:0}
+
+  /* ── Escenario del orbe ────────────────────────────────────────────────────── */
+  /* Columna en flujo normal: el orbe toma el espacio libre y el resto se apila debajo.
+     (Antes iba todo en absolute con numeros magicos y se pisaba al meter botones.) */
+  /* Lienzo oscuro dentro de la interfaz clara: sin navy, el orbe no brilla. */
+  .stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+         gap:16px;padding:16px 24px 20px;min-height:0;color:var(--stage-fg);
+         background:
+           radial-gradient(620px 420px at 78% 8%,rgba(18,56,140,.34) 0%,transparent 62%),
+           radial-gradient(900px 700px at 50% 42%,var(--stage-glow) 0%,var(--stage-bg) 72%)}
+  /* Grano fotográfico sutil: quita el look "flat de software" al lienzo (2.5%) */
+  .stage::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .025 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .grid-bg{position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(rgba(77,132,255,.05) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(77,132,255,.05) 1px,transparent 1px);
+    background-size:48px 48px;
+    -webkit-mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 72%);
+            mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 72%);}
+  canvas{width:min(46vmin,440px);height:min(46vmin,440px);position:relative;flex:none}
+
+  .estado{position:absolute;top:20px;left:24px;display:flex;align-items:center;gap:8px}
+  .estado .pill{padding:4px 10px;border-radius:var(--radius-full);font-size:11px;font-weight:700;
+                letter-spacing:.1em;text-transform:uppercase;
+                background:rgba(77,132,255,.14);color:var(--blue-pale);border:1px solid rgba(77,132,255,.35)}
+
+  .caption{text-align:center;padding:0 40px;max-width:860px;flex:none}
+  .you{font-size:15px;line-height:22px;color:var(--blue-pale);min-height:22px;font-weight:500}
+  .you .cursor{display:inline-block;width:7px;height:15px;background:var(--blue-light);
+               margin-left:3px;vertical-align:-2px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .agent{font-size:20px;line-height:28px;font-weight:600;color:var(--stage-fg);min-height:28px;margin-top:6px}
+  .voz-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;vertical-align:2px;
+           font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+           padding:2px 6px;border-radius:var(--radius-xs);
+           background:rgba(77,132,255,.16);color:var(--blue-pale);border:1px solid rgba(77,132,255,.35)}
+  .voz-tag.piper{background:rgba(238,214,17,.14);color:#EED611;border-color:rgba(238,214,17,.35)}
+
+  /* Transcripción persistente */
+  .tr{padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:4px;font-size:12px;line-height:17px}
+  .tr.u{background:var(--blue-ice);border:1px solid var(--blue-pale);color:var(--blue-medium);font-weight:500}
+  .tr.a{background:var(--surface-subtle);border:1px solid var(--border);color:var(--text-secondary)}
+  .tr .q{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);display:block;margin-bottom:2px}
+
+  /* ── Controles (tamaños/estados del brandbook §7) ──────────────────────────── */
+  .controles{display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
+  .gen-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid transparent;font-family:var(--font-jakarta);font-weight:600;white-space:nowrap;
+    cursor:pointer;
+    transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 120ms ease}
+  .gen-button:focus-visible{outline:none;box-shadow:0 0 0 4px var(--focus-ring)}
+  .gen-button:active:not(:disabled){transform:translateY(1px)}
+  .gen-button:disabled{cursor:not-allowed;opacity:.5}
+
+  .btn-hablar{height:48px;padding:0 24px;font-size:16px;border-radius:var(--radius-lg);
+              background:var(--gradient-cta);color:#fff;box-shadow:var(--glow-primary)}
+  .btn-hablar:hover:not(:disabled){filter:brightness(1.12)}
+  .btn-hablar.rec{background:var(--danger);color:#fff;box-shadow:0 0 24px rgba(238,18,17,.32)}
+  .btn-hablar .ico{width:16px;height:16px;border-radius:50%;background:currentColor;opacity:.9}
+  .btn-hablar.rec .ico{animation:lat 1s ease-in-out infinite}
+  @keyframes lat{50%{opacity:.35}}
+
+  .ejemplos{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  /* Dentro del escenario oscuro: blancos translucidos, no los tokens light */
+  .btn-ej{height:32px;padding:0 12px;font-size:12px;border-radius:var(--radius-sm);
+          background:rgba(255,255,255,.07);color:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.16)}
+  .btn-ej:hover:not(:disabled){background:rgba(77,132,255,.18);border-color:rgba(77,132,255,.45);color:#fff}
+  .btn-ej.cool{opacity:.45;cursor:not-allowed}
+  .hint-k{font-size:11px;color:var(--stage-fg-2)}
+  .hint-k kbd{font-family:var(--font-mono);background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+              border-radius:var(--radius-xs);padding:1px 5px;font-size:10px}
+
+  /* ── Popup de correo (el visitante TECLEA su correo, no lo dicta) ──────────── */
+  .modal-bg{position:fixed;inset:0;z-index:80;background:rgba(4,15,32,.48);display:none;
+            align-items:center;justify-content:center}
+  .modal-bg.open{display:flex}
+  .modal{width:min(480px,92vw);background:#fff;border-radius:var(--radius-xl);
+         box-shadow:0 18px 42px rgba(16,49,124,.14);padding:26px 28px;
+         animation:pop 180ms cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes pop{from{transform:scale(.92);opacity:0}}
+  .modal h3{font-size:19px;font-weight:800;color:var(--text-primary);margin:0 0 4px}
+  .modal p{font-size:13px;color:var(--text-secondary);margin:0 0 16px}
+  .modal input{width:100%;height:48px;padding:0 16px;font:500 16px var(--font-jakarta);
+               color:var(--text-primary);background:#fff;border:1px solid var(--border);
+               border-radius:var(--radius-md);outline:none}
+  .modal input:focus{border-color:var(--blue-primary);box-shadow:0 0 0 4px var(--focus-ring)}
+  .modal input.mal{border-color:var(--danger);box-shadow:0 0 0 4px rgba(238,18,17,.18)}
+  .modal .err{min-height:18px;font-size:11.5px;color:var(--danger);margin:6px 2px 10px}
+  .modal .fila{display:flex;gap:10px}
+  .modal .fila button{flex:1;height:44px;border:none;border-radius:var(--radius-md);cursor:pointer;
+                      font:600 14px var(--font-jakarta);
+                      transition:background-color 160ms ease,transform 120ms ease}
+  .modal .fila button:active{transform:translateY(1px)}
+  #em-enviar{background:var(--blue-primary);color:#fff}
+  #em-enviar:hover{background:var(--primary-hover)}
+  #em-cancelar{background:var(--surface-subtle);color:var(--text-secondary);border:1px solid var(--border)}
+  #em-cancelar:hover{background:#e8edf8}
+
+  /* ── Pipeline: se ilumina en cada etapa, con ms reales ─────────────────────── */
+  .pipe{display:flex;justify-content:center;gap:6px;flex:none;flex-wrap:wrap}
+  .node{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;
+        background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:var(--radius-sm);
+        font-size:11px;font-weight:600;color:rgba(255,255,255,.55);
+        transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease}
+  .node.on{background:rgba(77,132,255,.24);border-color:var(--blue-light);color:#fff}
+  .node.done{color:rgba(255,255,255,.72);border-color:rgba(77,132,255,.32)}
+  .node .ms{font-family:var(--font-mono);font-size:10px;color:var(--blue-pale)}
+  .arrow{align-self:center;color:rgba(255,255,255,.28);font-size:11px}
+
+  /* ── Rail derecho ──────────────────────────────────────────────────────────── */
+  .rail{border-left:1px solid var(--border);background:var(--surface);
+        display:grid;grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);min-height:0}
+  .rail section{padding:16px 20px;min-height:0;display:flex;flex-direction:column}
+  .rail section + section{border-top:1px solid var(--border)}
+  .rail h2{margin-bottom:12px}
+  .scroll{overflow-y:auto;min-height:0;margin:0 -20px;padding:0 20px}
+  .scroll::-webkit-scrollbar{width:6px}
+  .scroll::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:99px}
+
+  .card{display:flex;align-items:center;justify-content:space-between;gap:12px;
+        padding:10px 12px;background:var(--surface-subtle);border:1px solid var(--border);
+        border-radius:var(--radius-lg);margin-bottom:6px}
+  .card.live{border-color:var(--blue-primary);background:var(--blue-ice);
+             box-shadow:var(--shadow-sm),0 0 18px rgba(59,110,255,.12)}
+  .card .n{font-size:13px;font-weight:600;line-height:18px}
+  .card .s{font-size:11px;line-height:15px;color:var(--text-muted);margin-top:1px}
+  .badge{font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:var(--radius-xs);white-space:nowrap}
+  .badge.on{background:var(--blue-primary);color:#fff;border:1px solid var(--blue-primary)}
+  .badge.soon{background:var(--surface-subtle);color:var(--text-muted);border:1px solid var(--border)}
+
+  /* Los que aun no corren van densos y en gris: presentes en el catalogo, sin fingir que estan vivos */
+  .row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:var(--radius-sm)}
+  .row + .row{border-top:1px solid var(--border)}
+  .row .dot{width:5px;height:5px;border-radius:50%;background:var(--border-strong);flex:none}
+  .row .rn{font-size:12px;font-weight:500;color:var(--text-secondary);white-space:nowrap;
+           overflow:hidden;text-overflow:ellipsis}
+  .row .rs{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);white-space:nowrap}
+  .soon-h{display:flex;align-items:center;gap:8px;margin:14px 0 4px}
+  .soon-h span{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase}
+  .soon-h .ln{flex:1;height:1px;background:var(--border)}
+
+  .exec{padding:10px 12px;background:var(--surface-subtle);border:1px solid var(--border);
+        border-radius:var(--radius-lg);margin-bottom:6px;font-size:12px}
+  .exec .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .exec .who{font-weight:600;font-size:12px}
+  .exec .t{font-family:var(--font-mono);font-size:10px;color:var(--text-muted)}
+  .exec .subj{color:var(--text-secondary);margin:4px 0 6px;line-height:16px}
+  .exec .meta{font-family:var(--font-mono);font-size:10px;color:var(--text-muted)}
+  .st{font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;margin-top:6px}
+  .st.ok{color:#0B7A34} .st.bad{color:#A81210} .st.wait{color:var(--blue-medium)}
+  .empty{font-size:12px;color:var(--text-muted);padding:4px 0}
+
+  /* ── Barra de telemetría ───────────────────────────────────────────────────── */
+  .telem{display:flex;align-items:center;justify-content:space-between;gap:16px;
+         padding:0 24px;background:var(--surface-subtle);border-top:1px solid var(--border);
+         font-family:var(--font-mono);font-size:11px;color:var(--text-muted);overflow:hidden;white-space:nowrap}
+  .telem .l,.telem .r{display:flex;align-items:center;gap:18px}
+  .telem b{color:var(--blue-medium);font-weight:600}
+  .telem .k{color:var(--text-muted)}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <img src="static/gen-logo-white.png" alt="gen+">
+      <span class="sep"></span>
+      <span class="mod">EDGE AI · AGENTE DE VOZ</span>
+    </div>
+    <div class="chips" id="chips">
+      <span class="chip" id="c-stt"><span class="led"></span>STT <b>—</b></span>
+      <span class="chip" id="c-llm"><span class="led"></span>LLM <b>—</b></span>
+      <span class="chip" id="c-tts"><span class="led"></span>TTS <b>—</b></span>
+      <span class="chip" id="c-flow"><span class="led"></span>Agent Flow <b>—</b></span>
+      <span class="chip" id="c-ws"><span class="led"></span>UI</span>
+      <span class="chip ram" id="c-ram" title="RAM libre del equipo — el riesgo #1 del stand"><span class="led"></span>RAM <b id="ram-v">—</b></span>
+      <button class="chip kbtn" id="btn-full" title="Pantalla completa (modo stand)">⛶</button>
+      <button class="chip kbtn" id="btn-limpiar" title="Limpiar pantalla entre visitantes">Limpiar</button>
+      <button class="chip mic-btn" id="btn-mic" title="Configurar micrófono">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" style="flex:none">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>
+        </svg>
+        Micrófono
+      </button>
+    </div>
+  </header>
+
+  <div class="modal-bg" id="em-modal">
+    <div class="modal">
+      <h3>¿A qué correo te lo envío?</h3>
+      <p>El agente redactó tu mensaje y te lo manda ahí mismo. Solo se usa para este envío.</p>
+      <input id="em-input" type="email" placeholder="tucorreo@empresa.com" autocomplete="off" spellcheck="false">
+      <div class="err" id="em-err"></div>
+      <div class="fila">
+        <button id="em-cancelar">Cancelar</button>
+        <button id="em-enviar">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="pl-modal">
+    <div class="modal">
+      <h3>Entra al ranking del día 🏆</h3>
+      <p>Tu puntaje ya está listo. Anótate y compite por el primer puesto de la hora.</p>
+      <input id="pl-nombre" type="text" placeholder="Tu nombre" autocomplete="off" spellcheck="false" maxlength="40">
+      <input id="pl-empresa" type="text" placeholder="Tu empresa (opcional)" autocomplete="off" spellcheck="false" maxlength="40" style="margin-top:10px">
+      <div class="err" id="pl-err"></div>
+      <div class="fila">
+        <button id="pl-cancelar">Ahora no</button>
+        <button id="pl-enviar">Entrar al ranking</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mic-panel" id="mic-panel">
+    <h3>Micrófono <button id="mic-close" aria-label="Cerrar">✕</button></h3>
+    <div class="mic-list" id="mic-list"><div class="empty">Cargando…</div></div>
+    <div class="mic-test">
+      <button id="mic-probar">Probar — habla al pulsarlo</button>
+    </div>
+    <div class="mic-res" id="mic-res"></div>
+  </div>
+
+  <main>
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="estado"><span class="pill" id="pill">EN REPOSO</span></div>
+      <div id="attract-badge"><span class="wave">👋</span><span id="attract-txt">Acércate y háblame</span></div>
+      <div id="clima-card">
+        <div class="hdr">LIMA · EN VIVO · OPEN-METEO</div>
+        <div class="t" id="cl-t">—</div>
+        <div class="d" id="cl-d">—</div>
+        <div class="m" id="cl-m"></div>
+      </div>
+      <div id="vision-panel">
+        <div class="hdr"><span>VISIÓN · MODELO v3 DE OBRA</span><span class="rec"></span></div>
+        <img id="vision-img" alt="visión en vivo">
+        <div id="vision-cnt">
+          <span><b id="vc-p">0</b>personas</span>
+          <span><b id="vc-c">0</b>cascos</span>
+          <span><b id="vc-ch">0</b>chalecos</span>
+          <span><b id="vc-fps">—</b>fps</span>
+        </div>
+      </div>
+      <div id="gemma-card">
+        <div class="hdr"><span>MIRADA DE GEMMA · MULTIMODAL LOCAL</span><span class="dot"></span></div>
+        <img id="gemma-img" alt="lo que ve Gemma">
+        <div id="gemma-txt">Analizando la imagen…</div>
+      </div>
+      <div id="norma-card">
+        <div class="hdr"><span>COPILOTO DE LA NORMA · E.030 / E.060 · 100% LOCAL</span><span class="dot"></span></div>
+        <div id="norma-q"></div>
+        <div id="norma-a">Consultando la norma…</div>
+        <div id="norma-src"></div>
+      </div>
+      <canvas id="orb"></canvas>
+      <div class="caption">
+        <div class="you" id="you"></div>
+        <div class="agent"><span id="agent"></span><span id="voz"></span></div>
+      </div>
+
+      <div class="controles">
+        <button class="gen-button btn-hablar" id="btn-hablar">
+          <span class="ico"></span><span id="btn-hablar-t">Hablar</span>
+        </button>
+        <div class="ejemplos" id="ejemplos">
+          <button class="gen-button btn-ej" data-cool="20000"
+                  data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
+            Enviar un correo</button>
+          <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
+          <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
+          <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
+          <button class="gen-button btn-ej" data-t="prende las luces">Prender luces</button>
+          <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz</button>
+          <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio ETABS</button>
+          <button class="gen-button btn-ej" data-t="cumple las derivas">¿Cumple la norma?</button>
+          <button class="gen-button btn-ej" data-cool="10000" data-t="según la norma, ¿cuál es la deriva máxima en concreto armado?">Consultar la norma</button>
+          <button class="gen-button btn-ej" data-cool="60000" data-t="envíame el informe del edificio">Informe a mi correo</button>
+          <button class="gen-button btn-ej" data-t="¿qué temperatura hace en lima?">Clima en Lima</button>
+          <button class="gen-button btn-ej" data-cool="15000" data-t="activa la cámara de detección">Detección en vivo</button>
+          <button class="gen-button btn-ej" data-cool="12000" data-t="¿qué ves?">¿Qué ves?</button>
+          <button class="gen-button btn-ej" data-cool="10000" data-t="abre la ciudad">Ciudad 3D</button>
+          <button class="gen-button btn-ej" data-cool="10000" data-t="abre el edificio de ainy">Edificio Ainy</button>
+          <button class="gen-button btn-ej" data-t="desintégrate">Desintégrate</button>
+          <button class="gen-button btn-ej" data-t="cambia de color">Cambia de color</button>
+        </div>
+        <div class="hint-k">Pulsa <b>Hablar</b> y di tu pedido · o usa un ejemplo · <kbd>Enter</kbd> también funciona</div>
+      </div>
+
+      <div class="pipe" id="pipe">
+        <span class="node" data-s="mic">MIC</span><span class="arrow">→</span>
+        <span class="node" data-s="stt">WHISPER<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="router">ROUTER<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="llm">GEMMA<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="flow">AGENT FLOW<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="etabs">ETABS<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="tts">PIPER<span class="ms"></span></span>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <section>
+        <h2 class="cap">Agentes</h2>
+        <div class="scroll">
+          <div class="card live">
+            <div><div class="n">Correo</div><div class="s">Agent Flow · gen-flows · webhook</div></div>
+            <span class="badge on">EN VIVO</span>
+          </div>
+          <div class="card live">
+            <div><div class="n">ETABS · Edificio gen+</div><div class="s">2–8 pisos por voz · sismo E.030 · derivas · COM</div></div>
+            <span class="badge on">EN VIVO</span>
+          </div>
+
+          <div class="soon-h"><span>En el catálogo · aún no en vivo</span><span class="ln"></span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Aecodito · Centro de Operaciones</span><span class="rs">74 nodos</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Buscador SEACE</span><span class="rs">licitaciones</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Agente Inmobiliario</span><span class="rs">WhatsApp v1.1</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Ventas Summit VIP</span><span class="rs">gen-flows</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Verificador de Pagos</span><span class="rs">AI Talent</span></div>
+          <div class="row"><span class="dot"></span><span class="rn">Reuniones</span><span class="rs">Zoom v2.0</span></div>
+        </div>
+      </section>
+      <div id="stand-stats">
+        <div class="sstat"><b id="st-int">0</b><span>turnos</span></div>
+        <div class="sstat"><b id="st-cor">0</b><span>correos</span></div>
+        <div class="sstat"><b id="st-edi">0</b><span>edificios</span></div>
+        <div class="sstat"><b id="st-inf">0</b><span>informes</span></div>
+        <div class="sstat"><b id="st-fot">0</b><span>fotos</span></div>
+        <div class="sstat"><b id="st-led">0</b><span>leads</span></div>
+      </div>
+      <section id="sec-fotos" style="display:none;flex:none">
+        <h2 class="cap">Fotos del stand</h2>
+        <div id="fotos-strip"></div>
+      </section>
+      <section>
+        <h2 class="cap">Transcripción</h2>
+        <div class="scroll" id="tr"><div class="empty">Nadie ha hablado todavía.</div></div>
+      </section>
+      <section>
+        <h2 class="cap">Ejecuciones</h2>
+        <div class="scroll" id="execs"><div class="empty">Sin ejecuciones todavía.</div></div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="telem">
+    <div class="l">
+      <span><span class="k">stt</span> <b id="t-stt">—</b></span>
+      <span><span class="k">llm</span> <b id="t-llm">—</b></span>
+      <span><span class="k">flow</span> <b id="t-flow">—</b></span>
+      <span><span class="k">tts</span> <b id="t-tts">—</b></span>
+      <span><span class="k">total</span> <b id="t-total">—</b></span>
+    </div>
+    <div class="r">
+      <span id="t-stack" class="k">—</span>
+      <span><span class="k">destino</span> <b id="t-to">—</b></span>
+      <span><span class="k">uptime</span> <b id="t-up">00:00</b></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Animaciones v3 (16-jul): sobrias, sin exceso de glow (brandbook) ─────── */
+  .stage{position:relative}
+  .pill{transition:background .4s ease,color .4s ease,box-shadow .4s ease}
+  .pill[data-s="listening"]{background:rgba(77,132,255,.22);color:#cfe0ff;box-shadow:0 0 14px rgba(77,132,255,.30)}
+  .pill[data-s="transcribing"],.pill[data-s="thinking"]{background:rgba(147,112,255,.20);color:#ddd3ff;box-shadow:0 0 14px rgba(147,112,255,.26)}
+  .pill[data-s="speaking"]{background:rgba(77,180,255,.18);color:#d2ecff}
+  .pill[data-s="executing"]{background:rgba(77,132,255,.30);color:#fff;box-shadow:0 0 16px rgba(77,132,255,.40)}
+  .pill[data-s="waiting"]{background:rgba(255,196,77,.16);color:#ffe3ae}
+  .node{transition:background .3s,border-color .3s,color .3s}
+  .node.on{animation:nodeGlow 1.3s ease-in-out infinite}
+  @keyframes nodeGlow{50%{box-shadow:0 0 10px rgba(77,132,255,.45);border-color:#8fb0ff}}
+  .exec{animation:execIn .34s cubic-bezier(.2,.9,.3,1.15)}
+  @keyframes execIn{from{opacity:0;transform:translateX(14px)}}
+  .tr{animation:trIn .3s ease-out}
+  @keyframes trIn{from{opacity:0;transform:translateY(-6px)}}
+  .btn-ej{transition:background .2s,border-color .2s,color .2s,transform .15s}
+  .btn-ej:hover:not(:disabled){transform:translateY(-1px)}
+  .btn-ej:active:not(:disabled){transform:translateY(0) scale(.96)}
+  .btn-hablar{transition:transform .15s,box-shadow .3s}
+  .btn-hablar:not(:disabled):hover{transform:translateY(-1px)}
+  .btn-hablar:active:not(:disabled){transform:scale(.97)}
+  .btn-hablar:not(:disabled):not(.rec){animation:halo 3.4s ease-in-out infinite}
+  @keyframes halo{50%{box-shadow:0 0 18px rgba(77,132,255,.38)}}
+  .chip.up .led{animation:led 2.6s ease-in-out infinite}
+  @keyframes led{50%{box-shadow:0 0 6px rgba(35,194,127,.8)}}
+  #quizscore{position:absolute;left:50%;top:16%;transform:translateX(-50%);z-index:5;
+    background:rgba(6,20,42,.92);border:1px solid rgba(77,132,255,.5);border-radius:14px;
+    padding:14px 26px;text-align:center;pointer-events:none;
+    animation:qsIn .45s cubic-bezier(.2,.9,.3,1.25)}
+  #quizscore.out{animation:qsOut .5s ease forwards}
+  #quizscore .n{font-size:34px;font-weight:800;color:#8fb0ff;line-height:1}
+  #quizscore .l{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-top:4px}
+  @keyframes qsIn{from{opacity:0;transform:translateX(-50%) scale(.7)}}
+  @keyframes qsOut{to{opacity:0;transform:translateX(-50%) translateY(-14px)}}
+
+  /* ── Modo atraccion: gancho visible desde el pasillo ───────────────────── */
+  #attract-badge{position:absolute;left:50%;top:8%;transform:translateX(-50%);z-index:6;
+    display:none;align-items:center;gap:10px;padding:11px 22px;border-radius:999px;
+    background:linear-gradient(90deg,rgba(77,132,255,.22),rgba(120,90,255,.22));
+    border:1px solid rgba(120,150,255,.55);color:#dbe6ff;font-weight:700;font-size:15px;
+    letter-spacing:.3px;box-shadow:0 0 30px rgba(77,132,255,.35);pointer-events:none;white-space:nowrap}
+  #attract-badge.on{display:flex;animation:atPulse 1.8s ease-in-out infinite}
+  #attract-badge .wave{font-size:19px;animation:atWave 1.4s ease-in-out infinite}
+  @keyframes atPulse{50%{box-shadow:0 0 46px rgba(120,150,255,.6);border-color:rgba(150,180,255,.85)}}
+  @keyframes atWave{25%{transform:rotate(18deg)}75%{transform:rotate(-12deg)}}
+
+  /* ── Veredicto de derivas E.030 (panel sobre el escenario) ─────────────── */
+  #derivas-card{position:absolute;left:50%;top:13%;transform:translateX(-50%);z-index:5;
+    background:rgba(6,20,42,.94);border:1px solid rgba(77,132,255,.5);border-radius:14px;
+    padding:16px 22px;min-width:340px;pointer-events:none;
+    animation:qsIn .45s cubic-bezier(.2,.9,.3,1.25)}
+  #derivas-card.out{animation:qsOut .5s ease forwards}
+  #derivas-card .hd{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px}
+  #derivas-card .ti{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.6)}
+  #derivas-card .badge{font-size:12px;font-weight:800;letter-spacing:.5px;border-radius:999px;padding:4px 12px}
+  #derivas-card .badge.si{background:rgba(35,194,127,.16);color:#4fe0a3;border:1px solid rgba(35,194,127,.45)}
+  #derivas-card .badge.no{background:rgba(255,92,92,.14);color:#ff8080;border:1px solid rgba(255,92,92,.45)}
+  #derivas-card .fila{display:grid;grid-template-columns:24px 1fr 64px;gap:10px;align-items:center;margin:7px 0}
+  #derivas-card .eje{font-size:12px;font-weight:700;color:#8fb0ff}
+  #derivas-card .barra{position:relative;height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+  #derivas-card .barra i{position:absolute;inset:0 auto 0 0;border-radius:5px;transition:width .8s cubic-bezier(.2,.9,.3,1)}
+  #derivas-card .barra i.si{background:linear-gradient(90deg,#1d7a54,#23c27f)}
+  #derivas-card .barra i.no{background:linear-gradient(90deg,#a03030,#ff5c5c)}
+  #derivas-card .barra u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#ffd166;opacity:.9}
+  #derivas-card .val{font-size:12px;color:rgba(255,255,255,.82);text-align:right;font-variant-numeric:tabular-nums}
+  #derivas-card .ft{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:8px}
+  .exec .etabs-vista{display:block;width:100%;border-radius:8px;margin-top:8px;
+    border:1px solid rgba(77,132,255,.35)}
+
+  /* ── Ajustes dark de componentes (16-jul; los tokens ya viven arriba) ──────── */
+  .mic-btn:hover{background:rgba(77,132,255,.24)}
+  .mic-item.sel .radio{box-shadow:inset 0 0 0 2.5px #0A244C}
+  .mic-res.ok{border-color:rgba(35,194,127,.45);background:rgba(25,195,86,.12)}
+  .mic-res.ok b{color:#3DDC84}
+  .modal{background:var(--surface-raised);border:1px solid var(--border-strong)}
+  .modal input{background:#061A38;border-color:var(--border-strong)}
+  #em-cancelar:hover{background:rgba(122,168,255,.14)}
+  .st.ok{color:#3DDC84} .st.bad{color:#FF7B76}
+  .mic-panel{box-shadow:0 18px 42px rgba(0,0,0,.6)}
+  header{border-bottom-color:rgba(122,168,255,.12)}
+
+  /* ── Preview editable del informe (excel embebido, patron ESPARQ) ─────────── */
+  #inf-overlay{position:fixed;inset:0;z-index:80;background:rgba(2,8,20,.72);display:none;
+    align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+  #inf-overlay.open{display:flex}
+  #inf-modal{width:min(960px,94vw);max-height:88vh;display:flex;flex-direction:column;
+    background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:16px;
+    box-shadow:0 24px 60px rgba(0,0,0,.6);animation:pop 220ms cubic-bezier(.2,.9,.3,1.15)}
+  #inf-head{display:flex;align-items:baseline;gap:12px;padding:16px 22px 10px}
+  #inf-head b{font-size:15px;color:var(--text-primary)}
+  #inf-head span{font-size:11px;color:var(--text-muted)}
+  #inf-head .x{margin-left:auto;cursor:pointer;border:none;background:none;color:var(--text-muted);font-size:18px}
+  #inf-tabs{display:flex;gap:6px;padding:0 22px 10px;flex-wrap:wrap}
+  .inf-tab{height:28px;padding:0 12px;font-size:12px;font-weight:600;border-radius:var(--radius-sm);
+    border:1px solid var(--border);background:none;color:var(--text-secondary);cursor:pointer;
+    font-family:var(--font-jakarta)}
+  .inf-tab.on{background:rgba(77,132,255,.22);border-color:var(--blue-light);color:#fff}
+  #inf-grid{overflow:auto;margin:0 22px;border:1px solid var(--border);border-radius:10px;flex:1;min-height:200px}
+  #inf-grid table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+  #inf-grid th{position:sticky;top:0;background:#0E2A6B;color:#fff;padding:8px 12px;text-align:left;
+    font-size:11px;letter-spacing:.4px;white-space:nowrap}
+  #inf-grid td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text-primary);white-space:nowrap}
+  #inf-grid tr:nth-child(even) td{background:rgba(122,168,255,.05)}
+  #inf-grid td[contenteditable]:focus{outline:2px solid var(--blue-light);outline-offset:-2px;
+    background:rgba(77,132,255,.14);border-radius:3px}
+  #inf-foot{display:flex;gap:10px;padding:14px 22px 18px;align-items:center}
+  #inf-foot .nota{font-size:11px;color:var(--text-muted);margin-right:auto}
+  .inf-btn{height:36px;padding:0 16px;border:none;border-radius:var(--radius-md);cursor:pointer;
+    font-family:var(--font-jakarta);font-weight:600;font-size:13px;background:var(--blue-primary);color:#fff}
+  .inf-btn:hover{background:var(--primary-hover)}
+  .inf-btn.sec{background:rgba(77,132,255,.16);color:#cfe0ff;border:1px solid var(--border-strong)}
+  .inf-btn:disabled{opacity:.5;cursor:wait}
+  .ver-inf{margin-top:6px;height:26px;padding:0 10px;font-size:11px;font-weight:700;cursor:pointer;
+    border-radius:var(--radius-sm);border:1px solid var(--blue-light);background:rgba(77,132,255,.16);
+    color:#cfe0ff;font-family:var(--font-jakarta)}
+
+  /* ── Mejoras de plataforma (16-jul): métricas, fotos, RAM, kiosco ─────────── */
+  .chip.ram .led{transition:background .4s}
+  .chip.ram.warn .led{background:var(--warning)}
+  .chip.ram.crit .led{background:var(--danger);animation:led 1s ease-in-out infinite}
+  .kbtn{cursor:pointer;font-family:var(--font-jakarta)}
+  .kbtn:hover{background:rgba(77,132,255,.22)}
+  /* El rail original era un grid de 3 filas; con métricas y fotos son 5 */
+  .rail{grid-template-rows:auto auto auto minmax(0,1fr) minmax(0,1fr) !important}
+  #stand-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;
+    padding:10px 20px;border-top:1px solid var(--border)}
+  .sstat{min-width:0;background:var(--surface-subtle);border:1px solid var(--border);
+    border-radius:9px;padding:6px 2px;text-align:center}
+  .sstat b{display:block;font-size:15px;color:#8FB0FF;line-height:1.1;font-variant-numeric:tabular-nums}
+  .sstat span{font-size:7.5px;letter-spacing:.5px;color:var(--text-muted);text-transform:uppercase;
+    white-space:nowrap}
+  .sstat.bump b{animation:pop 300ms cubic-bezier(.2,.9,.3,1.3)}
+  #sec-fotos{padding-top:10px !important;padding-bottom:10px !important}
+  #sec-fotos h2{margin-bottom:8px}
+  #fotos-strip{display:flex;gap:8px;overflow-x:auto;padding:0 0 4px}
+  #fotos-strip img{height:58px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
+    transition:transform .15s}
+  #fotos-strip img:hover{transform:scale(1.06);border-color:var(--blue-light)}
+  #foto-big{position:fixed;inset:0;z-index:90;background:rgba(2,8,20,.85);display:none;
+    align-items:center;justify-content:center;cursor:zoom-out}
+  #foto-big.open{display:flex}
+  #foto-big img{max-width:88vw;max-height:86vh;border-radius:14px;border:1px solid var(--border-strong);
+    animation:pop 220ms cubic-bezier(.2,.9,.3,1.15)}
+
+  /* ── Clima en vivo (API): tarjeta sobre el escenario ────────────────────────── */
+  #clima-card{position:absolute;right:24px;top:56px;z-index:6;min-width:210px;
+    background:rgba(6,20,42,.94);border:1px solid rgba(77,132,255,.5);border-radius:14px;
+    padding:14px 18px;display:none;animation:pop 300ms cubic-bezier(.2,.9,.3,1.2)}
+  #clima-card.open{display:block}
+  #clima-card .t{font-size:34px;font-weight:800;color:#8FB0FF;line-height:1}
+  #clima-card .d{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px}
+  #clima-card .m{font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.6}
+  #clima-card .hdr{font-size:9.5px;letter-spacing:1.4px;color:rgba(255,255,255,.5);margin-bottom:6px}
+  /* ── Visión en vivo: el modelo de obra sobre la webcam ──────────────────────── */
+  #vision-panel{position:absolute;left:24px;bottom:24px;z-index:6;width:300px;
+    background:rgba(6,20,42,.94);border:1px solid rgba(77,132,255,.5);border-radius:14px;
+    padding:10px;display:none;animation:pop 300ms cubic-bezier(.2,.9,.3,1.2)}
+  #vision-panel.open{display:block}
+  #vision-panel img{width:100%;border-radius:9px;display:block;min-height:150px;background:#02060f}
+  #vision-panel .hdr{display:flex;justify-content:space-between;align-items:center;
+    font-size:9.5px;letter-spacing:1.4px;color:rgba(255,255,255,.55);margin:0 2px 8px}
+  #vision-panel .hdr .rec{width:7px;height:7px;border-radius:50%;background:var(--danger);
+    animation:lat 1.1s ease-in-out infinite}
+  #vision-cnt{display:flex;gap:6px;margin-top:8px}
+  #vision-cnt span{flex:1;text-align:center;background:rgba(77,132,255,.14);border-radius:7px;
+    padding:4px 2px;font-size:10px;color:#cfe0ff}
+  #vision-cnt b{display:block;font-size:15px;color:#8FB0FF}
+
+  /* ── Mirada de Gemma: snapshot + descripcion multimodal ────────────────── */
+  #gemma-card{position:absolute;right:24px;bottom:24px;z-index:6;width:320px;
+    background:rgba(6,20,42,.94);border:1px solid rgba(120,90,255,.55);border-radius:14px;
+    padding:10px;display:none;animation:pop 300ms cubic-bezier(.2,.9,.3,1.2)}
+  #gemma-card.open{display:block}
+  #gemma-card img{width:100%;border-radius:9px;display:block;background:#02060f}
+  #gemma-card .hdr{display:flex;justify-content:space-between;align-items:center;
+    font-size:9.5px;letter-spacing:1.2px;color:rgba(200,190,255,.7);margin:0 2px 8px}
+  #gemma-card .hdr .dot{width:7px;height:7px;border-radius:50%;background:#9a7dff;
+    box-shadow:0 0 8px #9a7dff;animation:lat 1.1s ease-in-out infinite}
+  #gemma-card.done .hdr .dot{animation:none;background:#23c27f;box-shadow:0 0 8px #23c27f}
+  #gemma-card #gemma-txt{margin-top:9px;font-size:12.5px;line-height:1.5;color:#e6ecff;
+    max-height:150px;overflow-y:auto}
+  #gemma-card.err{border-color:rgba(255,92,92,.55)}
+  #gemma-card.err #gemma-txt{color:#ff9a9a}
+
+  /* ── Copiloto de la Norma: respuesta citada (feature estrella) ─────────── */
+  #norma-card{position:absolute;left:50%;top:11%;transform:translateX(-50%);z-index:7;
+    width:min(560px,80%);background:rgba(6,20,42,.96);border:1px solid rgba(77,132,255,.55);
+    border-radius:16px;padding:16px 22px;display:none;box-shadow:0 12px 46px rgba(0,0,0,.5);
+    animation:pop 320ms cubic-bezier(.2,.9,.3,1.2)}
+  #norma-card.open{display:block}
+  #norma-card .hdr{display:flex;justify-content:space-between;align-items:center;
+    font-size:9.5px;letter-spacing:1.3px;color:rgba(150,180,255,.75);margin-bottom:10px}
+  #norma-card .hdr .dot{width:7px;height:7px;border-radius:50%;background:#4d84ff;
+    box-shadow:0 0 8px #4d84ff;animation:lat 1.1s ease-in-out infinite}
+  #norma-card.done .hdr .dot{animation:none;background:#23c27f;box-shadow:0 0 8px #23c27f}
+  #norma-card #norma-q{font-size:13px;color:#8fb0ff;font-weight:600;margin-bottom:8px}
+  #norma-card #norma-q::before{content:'“';opacity:.6} #norma-card #norma-q::after{content:'”';opacity:.6}
+  #norma-card #norma-a{font-size:15px;line-height:1.55;color:#eef3ff}
+  #norma-card #norma-src{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  #norma-card #norma-src .chip{font-size:11px;font-weight:700;letter-spacing:.3px;
+    background:rgba(77,132,255,.18);border:1px solid rgba(77,132,255,.45);color:#bcd2ff;
+    border-radius:999px;padding:3px 11px}
+  #norma-card.err{border-color:rgba(255,92,92,.55)} #norma-card.err #norma-a{color:#ff9a9a}
+
+  /* ── Deck por gestos (MediaPipe): overlay a pantalla completa ───────────────── */
+  #gestos-overlay{position:fixed;inset:0;z-index:100;background:#02060f;display:none}
+  #gestos-overlay.open{display:block}
+  #gestos-overlay iframe{width:100%;height:100%;border:none}
+  #gestos-cerrar{position:absolute;top:14px;right:18px;z-index:101;width:38px;height:38px;
+    border-radius:50%;border:1px solid var(--border-strong);background:rgba(6,20,42,.9);
+    color:#cfe0ff;font-size:16px;cursor:pointer;font-family:var(--font-jakarta)}
+  #gestos-cerrar:hover{background:rgba(77,132,255,.3)}
+  #twin-toast{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:102;
+    background:rgba(6,20,42,.94);border:1px solid rgba(77,132,255,.55);border-radius:999px;
+    padding:9px 20px;font-size:13px;color:#cfe0ff;display:none;white-space:nowrap;
+    animation:pop 200ms cubic-bezier(.2,.9,.3,1.2)}
+  #twin-toast.show{display:block}
+  #twin-toast b{color:#8FB0FF}
+
+  /* ── Luces del stand: prender ilumina el escenario, apagar deja el orbe solo ── */
+  .stage{transition:background 1s ease}
+  .stage.luces-on{background:radial-gradient(1100px 800px at 50% 38%,#12408f 0%,#0a2456 55%,#071633 100%)}
+  .stage.luces-on .grid-bg{opacity:1}
+  .stage.luces-on .estado,.stage.luces-on .hint-k{filter:brightness(1.25)}
+  .stage.luces-off{background:radial-gradient(700px 500px at 50% 42%,#03102a 0%,#000208 70%)}
+  .stage.luces-off .grid-bg{opacity:.12}
+  .stage.luces-off .ejemplos,.stage.luces-off .hint-k,.stage.luces-off .pipe{opacity:.35}
+</style>
+<div id="inf-overlay">
+  <div id="inf-modal">
+    <div id="inf-head"><b>Informe estructural — GEN+_EDIFICIO</b><span id="inf-fecha"></span>
+      <button class="x" onclick="infCerrar()">✕</button></div>
+    <div id="inf-tabs"></div>
+    <div id="inf-grid"></div>
+    <div id="inf-foot">
+      <span class="nota">Preview editable: toca cualquier celda y corrige. La exportación sale tal cual lo ves.</span>
+      <button class="inf-btn sec" id="inf-xlsx" onclick="infExportXlsx()">Exportar Excel</button>
+      <button class="inf-btn" id="inf-pdf" onclick="infExportPdf()">Exportar PDF</button>
+    </div>
+  </div>
+</div>
+<div id="foto-big" onclick="this.classList.remove('open')"><img id="foto-big-img" alt="foto"></div>
+<div id="gestos-overlay">
+  <button id="gestos-cerrar" onclick="gestosOff()" title="Cerrar (Esc)">✕</button>
+  <div id="twin-toast"></div>
+</div>
+<script src="static/demo.js"></script>
+<script src="static/vendor/xlsx.full.min.js"></script>
+<script src="static/orb.js"></script>
+<script>
+  orb.mount(document.getElementById('orb'));
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const ms = v => v >= 1000 ? (v/1000).toFixed(1)+'s' : Math.round(v)+'ms';
+  const ESTADOS = {idle:'EN REPOSO', listening:'ESCUCHANDO', transcribing:'TRANSCRIBIENDO',
+                   thinking:'PROCESANDO', speaking:'HABLANDO', executing:'EJECUTANDO',
+                   waiting:'ESPERANDO TU CORREO'};
+
+  // ── Ficha técnica del stack que realmente corre ──────────────────────────────
+  fetch('/api/info').then(r => r.json()).then(i => {
+    if (!i || !i.stt) return;
+    $('t-stack').textContent = `${i.stt} · ${i.stt_device} | ${i.brain} | ${i.tts} | ${i.agentflow_host}`;
+    $('t-to').textContent = i.to || '—';
+    $('c-stt').querySelector('b').textContent = i.stt_device;
+    $('c-llm').querySelector('b').textContent = i.brain;
+    $('c-tts').querySelector('b').textContent = i.tts_chip || 'Piper';
+    $('c-flow').querySelector('b').textContent = i.agentflow_host.split(':')[0];
+    ['c-stt','c-llm','c-tts'].forEach(c => $(c).classList.add('up'));  // locales: si corre, están
+  }).catch(() => {});
+
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    $('t-up').textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }, 1000);
+
+  // ── Pipeline ────────────────────────────────────────────────────────────────
+  const nodo = s => document.querySelector(`.node[data-s="${s}"]`);
+  function pipeReset(){ document.querySelectorAll('.node').forEach(n => {
+    n.classList.remove('on','done'); const m = n.querySelector('.ms'); if (m) m.textContent=''; }); }
+  function pipeOn(s){ const n = nodo(s); if (!n) return;
+    document.querySelectorAll('.node.on').forEach(x => x.classList.replace('on','done')); n.classList.add('on'); }
+  function pipeMs(s, v, nota){ const n = nodo(s); if (!n) return;
+    n.classList.remove('on'); n.classList.add('done');
+    const m = n.querySelector('.ms'); if (m) m.textContent = ms(v) + (nota === 'respaldo' ? ' ·respaldo' : ''); }
+
+  let acc = {};
+  function total(){ const t = Object.values(acc).reduce((a,b) => a+b, 0);
+    $('t-total').textContent = t ? ms(t) : '—'; }
+
+  // ── Transcripción persistente ───────────────────────────────────────────────
+  function addTr(quien, texto){
+    const box = $('tr');
+    const e = box.querySelector('.empty'); if (e) e.remove();
+    const d = document.createElement('div');
+    d.className = 'tr ' + quien;
+    d.innerHTML = '<span class="q">' + (quien === 'u' ? 'VISITANTE' : 'AECODITO') + ' · ' + hora() + '</span>'
+                + esc(texto);
+    box.prepend(d);
+    while (box.children.length > 20) box.lastChild.remove();  // en feria esto crece toda la tarde
+  }
+
+  // ── Ejecuciones ─────────────────────────────────────────────────────────────
+  let pending = null;
+  function addExec(html){
+    const e = $('execs').querySelector('.empty'); if (e) e.remove();
+    const d = document.createElement('div'); d.className = 'exec'; d.innerHTML = html;
+    $('execs').prepend(d); return d;
+  }
+  const hora = () => new Date().toLocaleTimeString('es-PE', {hour12:false});
+
+  // ── Botones → agente ────────────────────────────────────────────────────────
+  let sock = null, ocupado = false;
+  const $hablar = $('btn-hablar');
+
+  function enviar(cmd){
+    if (!sock || sock.readyState !== 1 || ocupado) return false;
+    sock.send(JSON.stringify(cmd));
+    setBusy(true);
+    return true;
+  }
+  function setBusy(v){
+    ocupado = v;
+    $hablar.disabled = v;
+    document.querySelectorAll('.btn-ej').forEach(b => { if (!b.classList.contains('cool')) b.disabled = v; });
+  }
+  function setRec(v){
+    $hablar.classList.toggle('rec', v);
+    $('btn-hablar-t').textContent = v ? 'Escuchando…' : 'Hablar';
+  }
+
+  $hablar.onclick = () => enviar({cmd:'listen'});
+
+  document.querySelectorAll('.btn-ej').forEach(b => {
+    b.onclick = () => {
+      if (!enviar({cmd:'say', text:b.dataset.t})) return;
+      // El correo se manda de verdad: enfriamiento para que nadie llene la bandeja a clics.
+      const cool = parseInt(b.dataset.cool || '0', 10);
+      if (cool){
+        b.classList.add('cool'); b.disabled = true;
+        setTimeout(() => { b.classList.remove('cool'); b.disabled = ocupado; }, cool);
+      }
+    };
+  });
+
+  // ── Panel de micrófono ──────────────────────────────────────────────────────
+  const $panel = $('mic-panel'), $list = $('mic-list'), $res = $('mic-res');
+
+  async function cargarMics(){
+    $list.innerHTML = '<div class="empty">Cargando…</div>';
+    try {
+      const r = await fetch('/api/mics').then(x => x.json());
+      $list.innerHTML = '';
+      if (!r.mics.length){ $list.innerHTML = '<div class="empty">Sin micrófonos de entrada.</div>'; return; }
+      r.mics.forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'mic-item' + (m.current ? ' sel' : '');
+        d.innerHTML = '<span class="radio"></span><span>' + esc(m.name) + '</span>'
+                    + '<span class="api">' + esc(m.api) + '</span>';
+        d.onclick = async () => {
+          const rr = await fetch('/api/mic', {method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({device: m.id})}).then(x => x.json());
+          if (rr.ok){ [...$list.children].forEach(x => x.classList.remove('sel')); d.classList.add('sel');
+            $res.className = 'mic-res show';
+            $res.innerHTML = 'Elegido: <b>' + esc(rr.name) + '</b>. Pulsa <b>Probar</b> y habla.'; }
+        };
+        $list.appendChild(d);
+      });
+    } catch(e){ $list.innerHTML = '<div class="empty">Error listando micrófonos.</div>'; }
+  }
+
+  $('btn-mic').onclick = () => { $panel.classList.toggle('open'); if ($panel.classList.contains('open')) cargarMics(); };
+  $('mic-close').onclick = () => $panel.classList.remove('open');
+
+  $('mic-probar').onclick = async () => {
+    const b = $('mic-probar');
+    b.disabled = true; b.textContent = 'Escuchando… HABLA AHORA';
+    $res.className = 'mic-res show'; $res.textContent = 'Grabando ~3 segundos…';
+    try {
+      const r = await fetch('/api/mic/test', {method:'POST'}).then(x => x.json());
+      const pct = Math.min(100, Math.round((r.rms || 0) * 1200));
+      $res.className = 'mic-res show' + (r.texto && r.texto.trim() ? ' ok' : '');
+      $res.innerHTML = '<b>' + esc(r.veredicto) + '</b>'
+        + '<div class="lvl"><i style="width:' + pct + '%"></i></div>'
+        + '<span style="font-family:var(--font-mono);font-size:10px">nivel rms ' + (r.rms ?? 0) + ' · pico ' + (r.pico ?? 0) + '</span>';
+    } catch(e){
+      $res.className = 'mic-res show'; $res.textContent = 'Error en la prueba: ' + e;
+    }
+    b.disabled = false; b.textContent = 'Probar — habla al pulsarlo';
+  };
+
+  // ── Popup de correo ─────────────────────────────────────────────────────────
+  const $em = $('em-modal'), $emIn = $('em-input'), $emErr = $('em-err');
+  const EMAIL_RX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+  function emAbrir(){
+    $emIn.value = ''; $emErr.textContent = ''; $emIn.classList.remove('mal');
+    $em.classList.add('open');
+    setTimeout(() => $emIn.focus(), 120);
+  }
+  function emCerrar(){ $em.classList.remove('open'); }
+
+  function emEnviar(){
+    const v = $emIn.value.trim();
+    if (!EMAIL_RX.test(v)){
+      $emIn.classList.add('mal');
+      $emErr.textContent = 'Ese correo no se ve válido — revísalo (ej: nombre@empresa.com).';
+      $emIn.focus();
+      return;
+    }
+    if (sock && sock.readyState === 1) sock.send(JSON.stringify({cmd:'email_to', to:v}));
+    emCerrar();
+  }
+  // ── Popup del ranking (nombre + empresa, tecleado: robusto en feria) ─────────
+  const $pl = $('pl-modal');
+  function plAbrir(){
+    $('pl-nombre').value = ''; $('pl-empresa').value = ''; $('pl-err').textContent = '';
+    $('pl-nombre').classList.remove('mal');
+    $pl.classList.add('open');
+    setTimeout(() => $('pl-nombre').focus(), 120);
+  }
+  function plCerrar(){ $pl.classList.remove('open'); }
+  function plEnviar(){
+    const nombre = $('pl-nombre').value.trim(), empresa = $('pl-empresa').value.trim();
+    if (nombre.length < 2){
+      $('pl-nombre').classList.add('mal');
+      $('pl-err').textContent = 'Escribe tu nombre para entrar al ranking.';
+      $('pl-nombre').focus(); return;
+    }
+    if (sock && sock.readyState === 1) sock.send(JSON.stringify({cmd:'player', nombre, empresa}));
+    plCerrar();
+  }
+  function plCancelar(){
+    if (sock && sock.readyState === 1) sock.send(JSON.stringify({cmd:'player_cancel'}));
+    plCerrar();
+  }
+  $('pl-enviar').onclick = plEnviar;
+  $('pl-cancelar').onclick = plCancelar;
+  $('pl-empresa').addEventListener('keydown', e => { if (e.key === 'Enter') plEnviar(); });
+  $('pl-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') $('pl-empresa').focus(); });
+
+  function emCancelar(){
+    if (sock && sock.readyState === 1) sock.send(JSON.stringify({cmd:'email_cancel'}));
+    emCerrar();
+  }
+
+  $('em-enviar').onclick = emEnviar;
+  $('em-cancelar').onclick = emCancelar;
+  $emIn.addEventListener('keydown', e => {
+    $emIn.classList.remove('mal'); $emErr.textContent = '';
+    if (e.key === 'Enter'){ e.preventDefault(); emEnviar(); }
+  });
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape' && $em.classList.contains('open')) emCancelar();
+  });
+
+  // ── WebSocket ───────────────────────────────────────────────────────────────
+  function connect(){
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+    sock = ws;
+    ws.onopen  = () => { $('c-ws').classList.remove('down'); $('c-ws').classList.add('up'); setBusy(false); };
+    ws.onclose = () => { $('c-ws').classList.remove('up'); $('c-ws').classList.add('down');
+                         setBusy(true); setRec(false); setTimeout(connect, 1500); };
+    ws.onmessage = ev => {
+      const m = JSON.parse(ev.data);
+
+      if (m.type === 'level'){ orb.setState('listening', m.level); pipeOn('mic'); return; }
+      if (m.type === 'speak'){
+        orb.playEnvelope(m.env, m.fps);
+        // Kore = frase del catálogo pre-renderizada · Piper = improvisada (se oye distinta)
+        if (m.voz) $('voz').innerHTML =
+          `<span class="voz-tag ${m.voz === 'piper' ? 'piper' : ''}">${m.voz.toUpperCase()}</span>`;
+        return;
+      }
+      if (m.type === 'metric'){
+        acc[m.stage] = m.ms; pipeMs(m.stage, m.ms, m.nota);
+        const el = $('t-' + m.stage); if (el) el.textContent = ms(m.ms);
+        if (m.stage === 'llm') $('c-llm').classList.toggle('down', m.nota === 'respaldo');
+        total(); return;
+      }
+      if (m.type === 'user'){
+        $('you').textContent = m.text ? '"' + m.text + '"' : '';
+        $('agent').textContent = ''; $('voz').innerHTML = '';
+        $('attract-badge').classList.remove('on');   // alguien interactuo: fuera el gancho
+        if (m.text) addTr('u', m.text);
+        pipeOn('router');
+      }
+      if (m.type === 'agent'){
+        $('agent').textContent = m.text || '';
+        if (m.text) addTr('a', m.text);
+      }
+      if (m.type === 'attract'){
+        // El stand invita solo: badge visible desde el pasillo mientras suena el gancho.
+        const b = $('attract-badge'); b.classList.add('on');
+        clearTimeout(window.__atHide);
+        window.__atHide = setTimeout(() => b.classList.remove('on'), 9000);
+      }
+      if (m.type === 'norma'){
+        const c = $('norma-card');
+        if (m.phase === 'start'){
+          c.className = 'open';
+          $('norma-q').textContent = m.pregunta || '';
+          $('norma-a').textContent = 'Consultando la norma…';
+          $('norma-src').innerHTML = '';
+          orb.setState('thinking');
+        } else if (m.phase === 'done'){
+          c.className = 'open done';
+          $('norma-a').textContent = m.respuesta || '';
+          $('norma-src').innerHTML = (m.fuentes || []).map(f => '<span class="chip">' + esc(f) + '</span>').join('');
+          orb.setState('success'); setTimeout(() => orb.setState('idle'), 2200);
+          clearTimeout(window.__normaHide);
+          window.__normaHide = setTimeout(() => c.classList.remove('open'), 32000);
+        } else {
+          c.className = 'open err';
+          $('norma-a').textContent = '✕ ' + (m.error || 'no pude consultar la norma');
+          orb.setState('error'); setTimeout(() => orb.setState('idle'), 2000);
+          clearTimeout(window.__normaHide);
+          window.__normaHide = setTimeout(() => c.classList.remove('open'), 12000);
+        }
+      }
+      if (m.type === 'gemma'){
+        const c = $('gemma-card');
+        if (m.phase === 'start'){
+          c.className = 'open';
+          if (m.img) $('gemma-img').src = '/photo?path=' + encodeURIComponent(m.img) + '&t=' + Date.now();
+          $('gemma-txt').textContent = 'Analizando la imagen…';
+          orb.setState('thinking');
+        } else if (m.phase === 'done'){
+          c.className = 'open done';
+          $('gemma-txt').textContent = m.texto || '(sin descripción)';
+          orb.setState('idle');
+          clearTimeout(window.__gemmaHide);
+          window.__gemmaHide = setTimeout(() => c.classList.remove('open'), 30000);
+        } else {
+          c.className = 'open err';
+          $('gemma-txt').textContent = '✕ ' + (m.error || 'no pude analizar la imagen');
+          orb.setState('error'); setTimeout(() => orb.setState('idle'), 2000);
+          clearTimeout(window.__gemmaHide);
+          window.__gemmaHide = setTimeout(() => c.classList.remove('open'), 12000);
+        }
+      }
+      if (m.type === 'exec'){
+        pipeOn('flow');
+        pending = addExec(
+          `<div class="top"><span class="who">${esc(m.agent)}</span><span class="t">${hora()}</span></div>
+           <div class="subj">${esc(m.subject)}</div>
+           <div class="meta">→ ${esc(m.to)}</div>
+           <div class="st wait js">· enviando…</div>`);
+      }
+      if (m.type === 'email_prompt') emAbrir();          // sin return: el estado sigue abajo
+      if (m.type === 'email_prompt_close') emCerrar();
+      if (m.type === 'player_prompt') plAbrir();
+      if (m.type === 'player_prompt_close') plCerrar();
+      if (m.type === 'outbox'){
+        addExec('<div class="top"><span class="who">Cola offline</span><span class="t">' + hora() + '</span></div>'
+          + '<div class="st ok">✓ ' + m.sent + ' correo(s) en cola enviados al volver la red</div>');
+        return;
+      }
+      if (m.type === 'exec_result'){
+        const st = pending && pending.querySelector('.js');
+        if (st){
+          st.className = 'st ' + (m.ok ? 'ok' : 'bad');
+          st.textContent = m.ok ? ('✓ entregado' + (m.run_id ? ' · run ' + m.run_id.slice(0,8) : ''))
+                       : (m.queued ? '⚠ sin red · en cola (sale al reconectar)' : '✕ ' + m.error);
+        }
+        $('c-flow').classList.toggle('up', !!m.ok);
+        $('c-flow').classList.toggle('down', !m.ok);
+        orb.setState(m.ok ? 'success' : 'error');
+        setTimeout(() => { orb.setState('idle'); pipeReset(); acc = {}; }, 3000);
+        pending = null; return;
+      }
+
+      if (m.type === 'clima'){
+        // Datos EN VIVO de la API: la voz es fija, los números van a la tarjeta.
+        $('cl-t').textContent = Math.round(m.temp) + '°C';
+        $('cl-d').textContent = m.desc || '';
+        $('cl-m').innerHTML = 'Sensación ' + Math.round(m.sensacion) + '°C · Humedad ' + m.humedad
+          + '% · Viento ' + Math.round(m.viento) + ' km/h';
+        $('clima-card').classList.add('open');
+        clearTimeout(window.__climaT);
+        window.__climaT = setTimeout(() => $('clima-card').classList.remove('open'), 20000);
+      }
+
+      if (m.type === 'vision'){
+        if (m.on) visionOn(); else visionOff();
+      }
+
+      if (m.type === 'gestos'){
+        if (m.on) gestosOn(m.app); else gestosOff();
+      }
+
+      if (m.type === 'twin_cmd' && m.texto){
+        const ov = $('gestos-overlay');
+        const f = ov.querySelector('iframe');
+        if (ov.classList.contains('open') && f){
+          const cmd = twinMap(m.texto, window.__twinApp);
+          if (cmd){
+            twinToast('«' + esc(m.texto) + '»');
+            f.contentWindow.postMessage({tipo: 'voz_nav', action: cmd.action, params: cmd.params || {}}, '*');
+          } else {
+            twinToast('No entendí: «' + esc(m.texto) + '»');
+          }
+        }
+      }
+
+      if (m.type === 'orb_fx'){
+        // Efectos del orbe: la voz no dice nada, el orbe ES la respuesta.
+        if (m.fx === 'color') orb.fx('color', m);
+        else orb.fx(m.fx);
+      }
+
+      if (m.type === 'lights'){
+        // Prender = escenario iluminado · Apagar = oscuridad total, el orbe brilla solo
+        const stage = document.querySelector('.stage');
+        stage.classList.toggle('luces-on', !!m.on);
+        stage.classList.toggle('luces-off', !m.on);
+      }
+
+      if (m.type === 'etabs'){
+        // Demo estructural: tarjetas propias por tipo (no tocan `pending` del correo).
+        window.__etabsCards = window.__etabsCards || {};
+        const k = m.kind || 'demo';
+        if (m.phase === 'start'){
+          pipeOn('etabs');
+          const titulo = k === 'reporte' ? 'Informe estructural · Excel + PDF' : 'ETABS · Edificio gen+';
+          const subj = k === 'reporte'
+            ? ('Periodos · reacciones · fuerzas' + (m.to ? ' → ' + esc(m.to) : ''))
+            : ('Pórtico ' + (m.pisos || 4) + ' pisos · modelo + sismo E.030 · analizando');
+          window.__etabsCards[k] = addExec(
+            '<div class="top"><span class="who">' + titulo + '</span><span class="t">' + hora() + '</span></div>'
+            + '<div class="subj">' + subj + '</div>'
+            + '<div class="st wait js-etabs">· ' + (k === 'reporte' ? 'generando…' : 'construyendo…') + '</div>');
+        } else {
+          const card = window.__etabsCards[k];
+          const st = card && card.querySelector('.js-etabs');
+          if (st){
+            st.className = 'st ' + (m.phase === 'done' ? 'ok' : 'bad');
+            st.textContent = m.phase === 'done'
+              ? ('✓ ' + (m.detalle || 'completado') + ' · ' + m.secs + 's')
+              : ('✕ ' + (m.error || 'ETABS no respondió'));
+          }
+          if (k === 'reporte' && m.phase === 'done'){
+            // Preview editable: se abre solo, y la tarjeta queda con acceso permanente.
+            if (card && !card.querySelector('.ver-inf')){
+              const bt = document.createElement('button');
+              bt.className = 'ver-inf'; bt.textContent = 'Ver y editar informe';
+              bt.onclick = () => infAbrir();
+              card.appendChild(bt);
+            }
+            setTimeout(() => infAbrir(), 900);
+          }
+          if (k === 'demo' && m.phase === 'done' && m.vista && card){
+            // Captura real de la ventana de ETABS (el 3D recien analizado)
+            const im = document.createElement('img');
+            im.className = 'etabs-vista'; im.alt = 'Edificio en ETABS';
+            im.src = '/photo?path=' + encodeURIComponent(m.vista) + '&t=' + Date.now();
+            im.onerror = () => im.remove();
+            card.appendChild(im);
+          }
+          if (m.phase === 'done' && typeof m.secs === 'number') pipeMs('etabs', m.secs * 1000);
+          else { const n = nodo('etabs'); if (n) n.classList.remove('on'); }
+          orb.setState(m.phase === 'done' ? 'success' : 'error');
+          setTimeout(() => orb.setState('idle'), 2500);
+          window.__etabsCards[k] = null;
+        }
+      }
+
+      if (m.type === 'derivas'){
+        // Veredicto E.030: la voz solo dice cumple/no cumple; los numeros van aqui.
+        const old = $('derivas-card'); if (old) old.remove();
+        const lim = m.limite || 0.007;
+        const fila = (eje, d) => {
+          const pct = Math.min(100, (d / (lim * 1.3)) * 100);
+          const cls = d <= lim ? 'si' : 'no';
+          return '<div class="fila"><span class="eje">' + eje + '</span>'
+            + '<span class="barra"><i class="' + cls + '" style="width:' + pct.toFixed(1) + '%"></i>'
+            + '<u style="left:' + (100 / 1.3).toFixed(1) + '%"></u></span>'
+            + '<span class="val">' + Number(d).toFixed(4) + '</span></div>';
+        };
+        const d = document.createElement('div'); d.id = 'derivas-card';
+        d.innerHTML = '<div class="hd"><span class="ti">DERIVAS E.030 · ' + (m.pisos || '?')
+          + ' PISOS · T1 ' + (m.t1 ? Number(m.t1).toFixed(2) + ' s' : '—') + '</span>'
+          + '<span class="badge ' + (m.cumple ? 'si">CUMPLE' : 'no">NO CUMPLE') + '</span></div>'
+          + fila('ΔX', m.deriva_x || 0) + fila('ΔY', m.deriva_y || 0)
+          + '<div class="ft">Deriva inelástica 0.75·R·Δe · límite concreto '
+          + lim.toFixed(3) + ' (línea amarilla) · espectro Z4·S1·R8</div>';
+        document.querySelector('.stage').appendChild(d);
+        setTimeout(() => d.classList.add('out'), 13500);
+        setTimeout(() => d.remove(), 14100);
+      }
+
+      if (m.type === 'quiz_score'){
+        // Puntaje animado sobre el escenario: aparece, respira 5 s y se va solo.
+        const old = $('quizscore'); if (old) old.remove();
+        const d = document.createElement('div'); d.id = 'quizscore';
+        d.innerHTML = '<div class="n">' + m.score + '/' + (m.total || 3) + '</div>'
+                    + '<div class="l">QUIZ · ACIERTOS</div>';
+        document.querySelector('.stage').appendChild(d);
+        setTimeout(() => d.classList.add('out'), 5200);
+        setTimeout(() => d.remove(), 5800);
+      }
+
+      const st = m.state && m.state.status;
+      if (st){
+        $('pill').textContent = ESTADOS[st] || st.toUpperCase();
+        $('pill').dataset.s = st;
+        if (st === 'transcribing') pipeOn('stt');   // Whisper, NO Gemma
+        if (st === 'thinking') pipeOn('llm');
+        if (st === 'speaking') pipeOn('tts');
+        const orbSt = st === 'transcribing' ? 'thinking' : st;
+        orb.setState(['listening','thinking','speaking','executing'].includes(orbSt) ? orbSt : 'idle');
+        setRec(st === 'listening');
+        // El agente vuelve a estar libre solo cuando termina de hablar y queda en reposo.
+        if (st === 'idle') setBusy(false); else if (st !== 'speaking') setBusy(true);
+      }
+    };
+  }
+  connect();
+
+  // ── Informe: preview editable (excel embebido, patrón ESPARQ) + export fiel ──
+  let INF = null, infHoja = 0;
+
+  async function infAbrir(){
+    try{
+      const r = await fetch('/api/informe');
+      if (!r.ok){ alert('Aún no hay informe: pide "modela el edificio" y luego "envíame el informe".'); return; }
+      INF = await r.json();
+    }catch(e){ return; }
+    $('inf-fecha').textContent = (INF.meta && INF.meta.fecha) ? ('· ' + INF.meta.fecha) : '';
+    infHoja = 0;
+    infTabs(); infGrid();
+    document.getElementById('inf-overlay').classList.add('open');
+  }
+  function infCerrar(){ document.getElementById('inf-overlay').classList.remove('open'); }
+  document.getElementById('inf-overlay').addEventListener('click', e => {
+    if (e.target.id === 'inf-overlay') infCerrar();
+  });
+
+  function infTabs(){
+    $('inf-tabs').innerHTML = INF.hojas.map((h,i) =>
+      `<button class="inf-tab${i===infHoja?' on':''}" onclick="infVer(${i})">${esc(h.nombre)}</button>`).join('');
+  }
+  function infVer(i){ infHoja = i; infTabs(); infGrid(); }
+
+  function infGrid(){
+    const h = INF.hojas[infHoja];
+    let html = '<table><tr>' + h.headers.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr>';
+    h.filas.forEach((fila, r) => {
+      html += '<tr>' + fila.map((v, c) =>
+        `<td contenteditable spellcheck="false" data-r="${r}" data-c="${c}">${esc(v)}</td>`).join('') + '</tr>';
+    });
+    $('inf-grid').innerHTML = html + '</table>';
+    // Cada edición vuelve al modelo: la exportación sale TAL CUAL lo que se ve.
+    $('inf-grid').querySelectorAll('td[contenteditable]').forEach(td => {
+      td.addEventListener('input', () => {
+        INF.hojas[infHoja].filas[+td.dataset.r][+td.dataset.c] = td.textContent;
+      });
+    });
+  }
+
+  function infNum(v){ const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? v : n; }
+
+  async function infExportXlsx(){
+    if (!INF) return;
+    const b = $('inf-xlsx'); b.disabled = true; b.textContent = 'Generando…';
+    try{
+      // Primero el Excel CON marca (server, openpyxl); SheetJS queda de respaldo.
+      const r = await fetch('/api/informe/xlsx', {method:'POST',
+        headers:{'Content-Type':'application/json'}, body: JSON.stringify(INF)});
+      if (r.ok && !(r.headers.get('content-type')||'').includes('json')){
+        const blob = await r.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'GEN+_EDIFICIO_informe.xlsx';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        return;
+      }
+      throw new Error('server xlsx no disponible');
+    }catch(e){
+      const wb = XLSX.utils.book_new();
+      INF.hojas.forEach(h => {
+        const aoa = [h.headers, ...h.filas.map(f => f.map(infNum))];
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        ws['!cols'] = h.headers.map((c,i) => ({wch: Math.max(String(c).length + 2,
+          ...h.filas.map(f => String(f[i] ?? '').length + 2), 10)}));
+        XLSX.utils.book_append_sheet(wb, ws, h.nombre.slice(0,31));
+      });
+      XLSX.writeFile(wb, 'GEN+_EDIFICIO_informe.xlsx');
+    } finally { b.disabled = false; b.textContent = 'Exportar Excel'; }
+  }
+
+  // ── Métricas del stand (se alimentan solas del flujo de eventos, via server) ─
+  const stMap = {interacciones:'st-int', correos:'st-cor', edificios:'st-edi',
+                 informes:'st-inf', fotos:'st-fot', leads:'st-led'};
+  let stPrev = {};
+  async function statsRefresh(){
+    try{
+      const s = await (await fetch('/api/stats')).json();
+      for (const k in stMap){
+        const el = $(stMap[k]);
+        if (!el) continue;
+        if (String(s[k]) !== el.textContent){
+          el.textContent = s[k];
+          const card = el.closest('.sstat');
+          if (stPrev[k] !== undefined){ card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump'); }
+        }
+      }
+      stPrev = s;
+    }catch(e){}
+  }
+  statsRefresh(); setInterval(statsRefresh, 8000);
+
+  // ── Galería de fotos del stand ───────────────────────────────────────────────
+  async function fotosRefresh(){
+    try{
+      const j = await (await fetch('/api/fotos')).json();
+      if (!j.fotos || !j.fotos.length) return;
+      $('sec-fotos').style.display = '';
+      $('fotos-strip').innerHTML = j.fotos.map(p =>
+        `<img loading="lazy" src="/photo?path=${encodeURIComponent(p)}" onclick="fotoBig(this.src)">`).join('');
+    }catch(e){}
+  }
+  window.fotoBig = src => { $('foto-big-img').src = src; $('foto-big').classList.add('open'); };
+  fotosRefresh();
+
+  // ── Monitor de RAM (riesgo #1 del stand): verde / ámbar <5GB / rojo <3GB ────
+  async function ramRefresh(){
+    try{
+      const s = await (await fetch('/api/salud')).json();
+      if (s.ram_libre_gb == null) return;
+      $('ram-v').textContent = s.ram_libre_gb.toFixed(1) + 'G';
+      const chip = $('c-ram');
+      chip.classList.remove('up','warn','crit');
+      chip.classList.add(s.ram_libre_gb < 3 ? 'crit' : s.ram_libre_gb < 5 ? 'warn' : 'up');
+      chip.title = `RAM libre ${s.ram_libre_gb} de ${s.ram_total_gb} GB` +
+        (s.ram_libre_gb < 3 ? ' — CRÍTICO: cierra aplicaciones o Gemma puede caerse' : '');
+    }catch(e){}
+  }
+  ramRefresh(); setInterval(ramRefresh, 20000);
+
+  // ── Visión en vivo: el modelo v3 de obra sobre la webcam (subproceso GAIATECH) ─
+  let visionTimer = null, visionT0 = 0;
+  function visionOn(){
+    $('vision-panel').classList.add('open');
+    clearInterval(visionTimer);
+    visionT0 = Date.now();
+    visionTimer = setInterval(async () => {
+      $('vision-img').src = '/photo?path=' + encodeURIComponent('data/vision_live.jpg') + '&t=' + Date.now();
+      try{
+        const s = await (await fetch('/api/vision')).json();
+        // Gracia de 35 s: el subproceso tarda en cargar torch+YOLO y puede haber
+        // un json viejo del run anterior — no cerrar el panel antes de tiempo.
+        if (!s.activo){ if (Date.now() - visionT0 > 35000) visionOff(); return; }
+        const c = s.conteo || {};
+        $('vc-p').textContent = c.persona || 0;
+        $('vc-c').textContent = c.casco || 0;
+        $('vc-ch').textContent = c.Chaleco || c.chaleco || 0;
+        $('vc-fps').textContent = s.fps != null ? s.fps : '—';
+      }catch(e){}
+    }, 450);
+  }
+  function visionOff(){
+    clearInterval(visionTimer); visionTimer = null;
+    $('vision-panel').classList.remove('open');
+  }
+
+  // ── Deck por gestos: iframe bajo demanda (MediaPipe vendorizado, 100% local) ──
+  const GESTOS_APPS = { ciudad: '/static/ciudad/index.html', ainy: '/static/ainy/index.html' };
+  function gestosOn(app){
+    window.__twinApp = GESTOS_APPS[app] ? app : 'ciudad';
+    const src = GESTOS_APPS[app] || GESTOS_APPS.ciudad;
+    const ov = $('gestos-overlay');
+    let f = ov.querySelector('iframe');
+    if (f && !f.src.endsWith(src)) { f.remove(); f = null; }  // cambiar de app = iframe nuevo
+    if (!f){
+      f = document.createElement('iframe');
+      f.src = src;
+      f.allow = 'camera';           // la camara la pide la app, mismo origen
+      ov.appendChild(f);
+    }
+    ov.classList.add('open');
+  }
+  function gestosOff(){
+    const ov = $('gestos-overlay');
+    ov.classList.remove('open');
+    const f = ov.querySelector('iframe');
+    if (f) f.remove();              // soltar la camara al cerrar
+    fetch('/api/twin/cerrado', {method:'POST'}).catch(() => {});  // sincroniza twin_nav
+  }
+
+  // ── Navegación por VOZ dentro del twin: español → acción del ejecutor ────────
+  const twinNorm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function twinMap(texto, app){
+    const t = twinNorm(texto);
+    const has = (...ws) => ws.some(w => t.includes(w));
+    // Comunes a ambos gemelos
+    if (has('modo noche')) return {action: 'night_mode'};
+    if (has('modo dia')) return {action: 'day_mode'};
+    if (has('detente', 'quieto')) return {action: app === 'ainy' ? 'stop_tour' : 'stop_cinematic'};
+    if (has('recorrido', 'tour')) return {action: app === 'ainy' ? 'cinematic_tour' : 'cinematic'};
+    if (has('vista aerea', 'desde arriba')) return {action: app === 'ainy' ? 'aerial_view' : 'aerial'};
+    if (has('reinicia', 'vista inicial')) return {action: app === 'ainy' ? 'reset_view' : 'reset'};
+    if (has('muestra todo')) return {action: 'show_all'};
+    if (has('alerta')) return {action: 'read_alerts'};
+    if (has('media vuelta')) return {action: 'rotate', params: {degrees: 180}};
+    if (has('gira', 'voltea')) return {action: 'rotate', params: {degrees: has('izquierda') ? -45 : 45}};
+    if (app === 'ainy'){
+      if (has('cocina')) return {action: 'kitchen_view'};
+      if (has('dormitorio', 'cuarto')) return {action: 'bedroom_view'};
+      if (has('sala', 'living')) return {action: 'living_view'};
+      if (has('fachada')) return {action: 'facade_view'};
+      if (has('quita') && has('rayos', 'radiografia')) return {action: 'set_xray', params: {on: false}};
+      if (has('rayos equis', 'radiografia', 'transparencia')) return {action: 'set_xray', params: {on: true}};
+      if (has('junta', 'arma')) return {action: 'set_explode', params: {on: false}};
+      if (has('despiece', 'explota', 'separa')) return {action: 'set_explode', params: {on: true}};
+      if (has('camina')) return {action: 'walk_mode'};
+      if (has('orbita')) return {action: 'orbit_mode'};
+      if (has('estructura')) return {action: 'show_layer', params: {layer: 'structure', solo: true}};
+      if (has('acerca', 'avanza', 'adelante')) return {action: 'zoom', params: {value: 8}};
+      if (has('aleja', 'retrocede', 'atras')) return {action: 'zoom', params: {value: 18}};
+      if (has('sube')) return {action: 'elevation', params: {meters: 6}};
+      if (has('baja')) return {action: 'elevation', params: {meters: 1}};
+    } else {
+      if (has('bloque a')) return {action: 'fly_to_zone', params: {zone: 'A-12'}};
+      if (has('bloque b', 'bloque be')) return {action: 'fly_to_zone', params: {zone: 'B-04'}};
+      if (has('bloque c', 'bloque ce')) return {action: 'fly_to_zone', params: {zone: 'C-09'}};
+      if (has('bloque d', 'bloque de')) return {action: 'fly_to_zone', params: {zone: 'D-22'}};
+      if (has('riesgo', 'peligro')) return {action: 'highlight_hazards'};
+      if (has('al norte', 'avanza', 'adelante')) return {action: 'move', params: {direction: 'north', distance: 200}};
+      if (has('al sur', 'retrocede', 'atras')) return {action: 'move', params: {direction: 'south', distance: 200}};
+      if (has('al este')) return {action: 'move', params: {direction: 'east', distance: 200}};
+      if (has('al oeste')) return {action: 'move', params: {direction: 'west', distance: 200}};
+      if (has('acerca')) return {action: 'zoom', params: {delta: -120}};
+      if (has('aleja')) return {action: 'zoom', params: {delta: 120}};
+      if (has('sube')) return {action: 'zoom', params: {delta: 150}};
+      if (has('baja')) return {action: 'zoom', params: {delta: -150}};
+    }
+    return null;
+  }
+  function twinToast(html){
+    const el = $('twin-toast');
+    el.innerHTML = html;
+    el.classList.add('show');
+    clearTimeout(window.__twinToastT);
+    window.__twinToastT = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+  // Acuses del twin (el ejecutor confirma cada accion aplicada)
+  window.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || !d.tipo) return;
+    if (d.tipo === 'voz_nav_ok'){ window.__lastTwinAck = d.action; twinToast('✓ <b>' + d.action.replace(/_/g, ' ') + '</b>'); }
+    if (d.tipo === 'voz_nav_err'){ twinToast('✕ ' + (d.error || d.action)); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && $('gestos-overlay').classList.contains('open')) gestosOff();
+  });
+
+  // ── Modo kiosco: pantalla completa + limpiar entre visitantes ───────────────
+  $('btn-full').onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+  };
+  $('btn-limpiar').onclick = () => {
+    $('tr').innerHTML = '<div class="empty">Nadie ha hablado todavía.</div>';
+    $('execs').innerHTML = '<div class="empty">Sin ejecuciones todavía.</div>';
+    $('agent').textContent = ''; $('voz').innerHTML = '';
+    const p = $('photo'); if (p) p.style.display = 'none';
+    pipeReset(); acc = {}; total();
+  };
+
+  async function infExportPdf(){
+    if (!INF) return;
+    const b = $('inf-pdf'); b.disabled = true; b.textContent = 'Generando…';
+    try{
+      const r = await fetch('/api/informe/pdf', {method:'POST',
+        headers:{'Content-Type':'application/json'}, body: JSON.stringify(INF)});
+      if (!r.ok || (r.headers.get('content-type')||'').includes('json')){
+        const j = await r.json().catch(() => ({}));
+        alert('PDF: ' + (j.error || 'no se pudo generar')); return;
+      }
+      const blob = await r.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'GEN+_EDIFICIO_informe.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    } finally { b.disabled = false; b.textContent = 'Exportar PDF'; }
+  }
+</script>
+</html>

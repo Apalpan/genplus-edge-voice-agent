@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ranking del día · gen+</title>
+<style>
+  /* Tokens GEN+ (DESIGN.md §11 dark) — mismo lienzo que la pantalla principal */
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Regular.woff2") format("woff2");font-weight:400;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:block}
+  @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:block}
+  :root{
+    --navy:#040F20;--surface:#06142A;--raised:#0A244C;
+    --blue:#4D84FF;--blue-primary:#2165FF;--ice:#BACFFF;
+    --border:rgba(122,168,255,.15);--border-strong:rgba(122,168,255,.34);
+    --oro:#ffd166;
+    --gradient-brand:linear-gradient(165deg,#0E2A6B 0%,#12388C 20%,#1748B5 40%,#1E5CE8 60%,#2165FF 80%,#4D84FF 100%);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+      radial-gradient(560px 380px at 82% 0%,rgba(18,56,140,.36) 0%,transparent 60%),
+      radial-gradient(120% 90% at 50% 0%,#0a1c3a 0%,var(--navy) 60%);
+    color:#EAF0FF;font-family:'Plus Jakarta Sans',system-ui,Segoe UI,sans-serif;
+    min-height:100vh;overflow:hidden;padding:3vh 4vw;font-variant-numeric:tabular-nums}
+  /* Grano sutil, misma firma que la pantalla del orbe */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .025 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    margin-bottom:3vh;padding-bottom:2vh;position:relative}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+    background:var(--gradient-brand);opacity:.55}
+  .brandline{display:flex;align-items:center;gap:18px;margin-bottom:10px}
+  .brandline img{height:34px;width:auto;display:block}
+  .brandline .sep{width:1px;height:26px;background:var(--border-strong)}
+  .brandline .mod{font-size:13px;font-weight:700;letter-spacing:.16em;color:#B9C7E4}
+  h1{font-size:clamp(20px,2.4vw,28px);font-weight:800;color:var(--ice);letter-spacing:.06em}
+  .hora{font-size:15px;color:#7E93BC;text-align:right;line-height:1.6}
+  .hora b{color:#EAF0FF}
+  .podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:20px;align-items:end;margin-bottom:26px}
+  .p{background:var(--surface);border:1px solid var(--border-strong);border-radius:18px;
+    padding:22px 18px;text-align:center;position:relative;transition:transform .4s;
+    box-shadow:0 12px 28px rgba(0,0,0,.4)}
+  .p .medal{font-size:40px;line-height:1}
+  .p .nm{font-size:clamp(20px,2.2vw,28px);font-weight:800;margin:8px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p .co{font-size:14px;color:#7E93BC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p .sc{font-size:clamp(32px,3.4vw,44px);font-weight:800;color:var(--blue);margin-top:10px}
+  .p.first{border-color:var(--oro);box-shadow:0 0 40px rgba(255,209,102,.22),0 18px 42px rgba(0,0,0,.45);transform:translateY(-14px)}
+  .p.first::before{content:"";position:absolute;inset:-1px;border-radius:18px;padding:1px;
+    background:linear-gradient(135deg,rgba(255,209,102,.85),rgba(255,209,102,.15) 55%,rgba(255,209,102,.6));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .p.first .sc{color:var(--oro)}
+  .p.nuevo{animation:flash 1.2s ease}
+  @keyframes flash{0%,100%{box-shadow:0 0 40px rgba(255,209,102,.22)}50%{box-shadow:0 0 70px rgba(255,209,102,.9)}}
+  .rest{display:flex;flex-direction:column;gap:10px}
+  .row{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:16px;
+    background:rgba(6,20,42,.72);border:1px solid var(--border);border-radius:12px;padding:12px 20px}
+  .row .rk{font-size:22px;font-weight:800;color:#56688F;text-align:center}
+  .row .who .n{font-size:20px;font-weight:700}
+  .row .who .c{font-size:13px;color:#7E93BC}
+  .row .s{font-size:24px;font-weight:800;color:var(--ice)}
+  .vacio{text-align:center;color:#7E93BC;font-size:20px;margin-top:14vh;line-height:1.7}
+  footer{position:fixed;bottom:2.5vh;left:0;right:0;text-align:center;font-size:13px;color:#56688F}
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="brandline">
+        <img src="static/gen-logo-white.png" alt="gen+">
+        <span class="sep"></span>
+        <span class="mod">AI CONSTRUCTION SUMMIT · STAND</span>
+      </div>
+      <h1>RANKING DEL DÍA · QUIZ DE IA EN CONSTRUCCIÓN</h1>
+    </div>
+    <div class="hora">SE REINICIA CADA HORA<br><b id="hora">—</b> · <b id="cnt">0</b> jugadores esta hora</div>
+  </header>
+  <div id="podium" class="podium"></div>
+  <div id="rest" class="rest"></div>
+  <div id="vacio" class="vacio" style="display:none">Aún no hay jugadores esta hora.<br>¡Juega el quiz en el stand y entra al ranking!</div>
+  <footer>AI Construction Summit 2026 · Stand gen+ · agente de voz edge · el ranking corre 100% local</footer>
+
+  <script>
+  /* VISTA PREVIA: sin backend, el ranking se simula (en el stand viene de data/leaderboard.jsonl) */
+  (function(){
+    const players=[
+      {nombre:"María F.",empresa:"Constructora Andes",score:3,total:3},
+      {nombre:"Jorge L.",empresa:"Inmobiliaria Sur",score:2,total:3},
+      {nombre:"Valeria Q.",empresa:"Estudio VQ",score:2,total:3},
+      {nombre:"Renzo T.",empresa:"PUCP",score:1,total:3},
+      {nombre:"Carla M.",empresa:"Municipalidad de Lima",score:1,total:3}];
+    const real=window.fetch.bind(window);
+    window.fetch=function(u,o){
+      if(String(u).includes("/api/leaderboard")){
+        const hh=new Date().getHours();
+        return Promise.resolve(new Response(JSON.stringify({
+          hora:`${String(hh).padStart(2,"0")}:00–${String((hh+1)%24).padStart(2,"0")}:00`,
+          jugadores_hora:players.length, top:players}),{headers:{"Content-Type":"application/json"}}));
+      }
+      return real(u,o);
+    };
+  })();
+  const $ = id => document.getElementById(id);
+  const esc = s => (s == null ? '' : String(s)).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const MED = ['🥇','🥈','🥉'];
+  let prevLider = null;
+
+  async function tick(){
+    let d;
+    try { d = await (await fetch('/api/leaderboard')).json(); }
+    catch(e){ return; }
+    $('hora').textContent = d.hora || '—';
+    $('cnt').textContent = d.jugadores_hora || 0;
+    const top = d.top || [];
+    const podium = $('podium'), rest = $('rest'), vacio = $('vacio');
+    if (!top.length){ podium.innerHTML = ''; rest.innerHTML = ''; vacio.style.display = 'block'; prevLider = null; return; }
+    vacio.style.display = 'none';
+
+    const liderActual = top[0] ? (top[0].nombre + '|' + top[0].score) : null;
+    const esNuevo = prevLider !== null && liderActual !== prevLider;
+    prevLider = liderActual;
+
+    // Podio (top 3): orden visual 2 - 1 - 3
+    const ord = [top[1], top[0], top[2]];
+    const clase = ['', 'first', ''];
+    podium.innerHTML = ord.map((r, i) => {
+      if (!r) return '<div class="p" style="visibility:hidden"></div>';
+      const rank = r === top[0] ? 0 : (r === top[1] ? 1 : 2);
+      const nuevo = (i === 1 && esNuevo) ? ' nuevo' : '';
+      return '<div class="p ' + clase[i] + nuevo + '"><div class="medal">' + MED[rank] + '</div>'
+        + '<div class="nm">' + esc(r.nombre) + '</div>'
+        + '<div class="co">' + (esc(r.empresa) || '&nbsp;') + '</div>'
+        + '<div class="sc">' + r.score + '/' + (r.total || 3) + '</div></div>';
+    }).join('');
+
+    // Del 4 al 10
+    rest.innerHTML = top.slice(3).map((r, i) =>
+      '<div class="row"><div class="rk">' + (i + 4) + '</div>'
+      + '<div class="who"><div class="n">' + esc(r.nombre) + '</div>'
+      + '<div class="c">' + (esc(r.empresa) || '') + '</div></div>'
+      + '<div class="s">' + r.score + '/' + (r.total || 3) + '</div></div>').join('');
+  }
+  tick();
+  setInterval(tick, 4000);
+  </script>
+</body>
+</html>

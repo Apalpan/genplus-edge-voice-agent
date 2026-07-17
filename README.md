@@ -1,5 +1,9 @@
 # GEN+ · Edge Voice Agent
 
+**🌐 Vista previa web (modo demo):** https://apalpan.github.io/genplus-edge-voice-agent/
+*(la misma interfaz; sin backend simula el agente con la voz del navegador — el sistema
+completo corre offline en el equipo del stand)*
+
 Agente de voz **Edge AI** para el stand de GEN+ en el AI Construction Summit 2026.
 El visitante habla → **faster-whisper** transcribe → **Gemma 3:4b** (Ollama) responde
 → **Piper/Iapetus** habla. Todo **local y offline** (salvo el correo). Un solo comando.

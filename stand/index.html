@@ -2,7 +2,7 @@
 <html lang="es" data-theme="dark">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Genbot · Edge Voice Agent · gen+</title>
+<title>GenBOT · Edge Voice Agent · gen+</title>
 <script>
   (function(){
     var saved = localStorage.getItem('genbot-theme');
@@ -495,7 +495,7 @@
         </button>
         <div class="ejemplos" id="ejemplos">
           <div class="ej-tabs" id="ej-tabs" role="tablist" aria-label="Categorías">
-            <button class="ej-tab on" data-cat="conversa">Genbot</button>
+            <button class="ej-tab on" data-cat="conversa">GenBOT</button>
             <button class="ej-tab" data-cat="ingenieria">Ingeniería</button>
             <button class="ej-tab" data-cat="vision">Visión</button>
             <button class="ej-tab" data-cat="agentes">Agentes</button>
@@ -561,7 +561,7 @@
         <h2 class="cap">Agentes</h2>
         <div class="scroll">
           <div class="card live">
-            <div><div class="n">Genbot local <span class="vtag">v6.0</span></div><div class="s">Whisper + Gemma 4 + Piper en la computadora del stand</div></div>
+            <div><div class="n">GenBOT local <span class="vtag">v6.1</span></div><div class="s">Whisper + Gemma 4 + Piper en la computadora del stand</div></div>
             <span class="badge local">EN STAND</span>
           </div>
           <div class="card live">
@@ -1158,7 +1158,7 @@
       if (m.type === 'agentflow'){
         if (m.phase === 'start'){
           pipeOn('flow');
-          window.__afCard = addExec('<div class="top"><span class="who">Genbot · AgentFlow</span><span class="t">' + hora() + '</span></div>'
+          window.__afCard = addExec('<div class="top"><span class="who">GenBOT · AgentFlow</span><span class="t">' + hora() + '</span></div>'
             + '<div class="subj">Centro de Operaciones · memoria + herramientas</div><div class="st wait js-af">· consultando…</div>');
         } else {
           const st = window.__afCard && window.__afCard.querySelector('.js-af');
@@ -1172,12 +1172,12 @@
         }
       }
       if (m.type === 'pc_action'){
-        addExec('<div class="top"><span class="who">Genbot · PC local</span><span class="t">' + hora() + '</span></div>'
+        addExec('<div class="top"><span class="who">GenBOT · PC local</span><span class="t">' + hora() + '</span></div>'
           + '<div class="subj">' + esc(m.action || 'acción') + '</div><div class="st ' + (m.ok ? 'ok' : 'bad') + '">'
           + (m.ok ? '✓ ejecutada desde la lista permitida' : '✕ no ejecutada') + '</div>');
       }
       if (m.type === 'app_open'){
-        addExec('<div class="top"><span class="who">Genbot · Ecosistema</span><span class="t">' + hora() + '</span></div>'
+        addExec('<div class="top"><span class="who">GenBOT · Ecosistema</span><span class="t">' + hora() + '</span></div>'
           + '<div class="subj">' + esc(m.label || 'aplicación') + '</div><div class="st ' + (m.ok ? 'ok' : 'bad') + '">'
           + (m.ok ? '✓ disponible en el catálogo' : '✕ no disponible') + '</div>');
       }

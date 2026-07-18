@@ -1,119 +1,21 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GEN+ EDGE AI · Agente de Voz</title>
-  <meta name="description" content="Agente de voz Edge AI de GEN+ para el AI Construction Summit 2026. Whisper · Gemma · Piper — todo local, sin nube." />
-  <meta property="og:title" content="GEN+ EDGE AI · Agente de Voz" />
-  <meta property="og:description" content="El visitante habla, el orbe responde. Edge AI para construcción — offline, en el stand #27." />
-  <meta name="theme-color" content="#050A18" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='70%25'%3E%3Cstop offset='0%25' stop-color='%234D84FF'/%3E%3Cstop offset='55%25' stop-color='%232165FF'/%3E%3Cstop offset='100%25' stop-color='%230E2A6B'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='26' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='32' r='30' fill='none' stroke='%232165FF' stroke-opacity='.35' stroke-width='2'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="web/styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Genie · Asistente inteligente · GEN+</title>
+  <meta name="description" content="Conoce Genie, pronunciado Yeny: el asistente inteligente de GEN+ con voz, modelo local y conexión segura a AgentFlow.">
+  <meta property="og:title" content="Genie · Asistente inteligente · GEN+">
+  <meta property="og:description" content="Demo comercial interactiva de Genie, el asistente inteligente de GEN+.">
+  <meta name="theme-color" content="#040F20">
+  <link rel="canonical" href="https://apalpan.github.io/genplus-edge-voice-agent/stand/">
+  <meta http-equiv="refresh" content="0;url=stand/">
+  <style>
+    :root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#040f20;color:#eaf0ff}
+    body{min-height:100vh;display:grid;place-items:center;margin:0}
+    a{color:#fff;background:linear-gradient(135deg,#315dff,#54a7ff);padding:14px 22px;border-radius:12px;text-decoration:none;font-weight:700}
+  </style>
+  <script>location.replace('stand/' + location.search + location.hash)</script>
 </head>
-<body data-state="reposo">
-
-  <!-- ══ BOOT OVERLAY ══ -->
-  <div class="boot" id="boot" aria-hidden="true">
-    <div class="boot-inner">
-      <span class="boot-mark">GEN+</span>
-      <span class="boot-line" id="bootLine">inicializando núcleo edge…</span>
-      <div class="boot-bar"><i id="bootBar"></i></div>
-    </div>
-  </div>
-
-  <!-- ══ TOP BAR ══ -->
-  <header class="topbar reveal">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">GEN+</span>
-      <span class="brand-sub">EDGE AI · AGENTE DE VOZ</span>
-    </div>
-    <div class="status-pills" id="statusPills" aria-label="Estado de motores">
-      <span class="pill" data-k="stt"><i></i>STT <b>—</b></span>
-      <span class="pill" data-k="llm"><i></i>LLM <b>—</b></span>
-      <span class="pill" data-k="tts"><i></i>TTS <b>—</b></span>
-      <span class="pill" data-k="flow"><i></i>Agent Flow <b>—</b></span>
-      <span class="pill demo-pill" id="demoPill" hidden><i></i>VISTA PREVIA WEB</span>
-    </div>
-    <div class="top-actions">
-      <button class="ghost" id="btnClear" type="button">Limpiar</button>
-      <button class="ghost" id="btnMic" type="button"><span aria-hidden="true">🎙</span> Micrófono</button>
-    </div>
-  </header>
-
-  <main class="stage">
-    <!-- ══ CENTRO ══ -->
-    <section class="center" aria-label="Agente de voz">
-      <div class="state-row reveal" aria-live="polite">
-        <span class="state-chip" id="stateChip">EN REPOSO</span>
-        <span class="state-hint" id="stateHint">esperando a que alguien hable</span>
-      </div>
-
-      <div class="orb-wrap reveal" id="orbWrap">
-        <canvas id="orb" aria-hidden="true"></canvas>
-        <div class="orb-core" aria-hidden="true"></div>
-        <div class="orb-glow" aria-hidden="true"></div>
-        <div class="orb-ring r1" aria-hidden="true"></div>
-        <div class="orb-ring r2" aria-hidden="true"></div>
-      </div>
-
-      <div class="ask reveal">
-        <button class="talk" id="btnTalk" type="button">
-          <span class="dot" aria-hidden="true"></span>Hablar
-        </button>
-        <form class="ask-form" id="askForm">
-          <input id="askInput" type="text" placeholder="…o escribe tu pedido" autocomplete="off"
-                 aria-label="Escribe tu pedido al agente" />
-          <button class="ask-send" type="submit" aria-label="Enviar">↵</button>
-        </form>
-      </div>
-      <p class="hint reveal">Pulsa <b>Hablar</b>, toca un ejemplo, o escribe y presiona <kbd>Enter</kbd></p>
-
-      <div class="chips reveal" id="chips" role="group" aria-label="Ejemplos de comandos"></div>
-
-      <div class="pipeline reveal" id="pipeline" aria-label="Pipeline de procesamiento">
-        <span data-n="MIC">MIC</span><em></em><span data-n="WHISPER">WHISPER</span><em></em><span data-n="GEMMA">GEMMA</span><em></em><span data-n="AGENT FLOW">AGENT FLOW</span><em></em><span data-n="PIPER">PIPER</span>
-      </div>
-    </section>
-
-    <!-- ══ PANEL DERECHO ══ -->
-    <aside class="side">
-      <div class="side-block reveal">
-        <h3>Agentes</h3>
-        <div class="agents-live" id="agentsLive"></div>
-        <h4 class="dim">En el catálogo · aún no en vivo</h4>
-        <ul class="catalog" id="catalog"></ul>
-      </div>
-
-      <div class="metrics reveal" id="metrics" aria-label="Métricas del stand"></div>
-
-      <div class="side-block reveal">
-        <h4 class="dim">Transcripción</h4>
-        <div class="transcript" id="transcript" aria-live="polite"><p class="empty">Nadie ha hablado todavía.</p></div>
-      </div>
-
-      <div class="side-block reveal">
-        <h4 class="dim">Ejecuciones</h4>
-        <div class="execs" id="execs"><p class="empty">Sin ejecuciones todavía.</p></div>
-      </div>
-    </aside>
-  </main>
-
-  <!-- ══ FOOTER TELEMETRÍA ══ -->
-  <footer class="footer">
-    <span id="footL">stt — · llm — · tts —</span>
-    <span class="foot-mid" id="footM">gen+ · edge ai para construcción</span>
-    <span id="footR">uptime <b id="uptime">00:00</b></span>
-  </footer>
-
-  <!-- ══ MODAL (lead / quiz) ══ -->
-  <div class="modal" id="leadModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-card"></div>
-  </div>
-
-  <script src="web/app.js"></script>
-</body>
+<body><a href="stand/">Abrir Genie</a></body>
 </html>

@@ -1,8 +1,8 @@
-/* ═══ demo.js — VISTA PREVIA WEB del Edge Voice Agent (stand gen+) ═══════════
+/* ═══ showcase.js — DEMO COMERCIAL WEB DE GENIE (stand gen+) ════════════════
    Reemplaza el backend real (FastAPI + WebSocket) por un bus simulado que habla
    el MISMO contrato de eventos que el orquestador. La UI (index.html) no se toca:
    cree estar conectada al agente del stand. En el evento, el sistema completo
-   corre local-first en el equipo físico (Whisper + Gemma 4 + Piper locales).    */
+   corre local-first en el equipo físico (Whisper + Gemma 4 + Piper Daniela).    */
 (function () {
   "use strict";
 
@@ -17,15 +17,22 @@
   let sockets = [];
   let pendingEmail = null, pendingPlayer = null, idleTimer = null;
 
-  /* ── voz del navegador (el stand real usa Iapetus pre-renderizada + Piper) ── */
+  /* ── voz femenina del navegador; el runtime local usa Piper Daniela ──────── */
+  let selectedVoice = null;
+  function preferredVoice() {
+    const voices = speechSynthesis.getVoices();
+    const spanish = voices.filter((item) => /^es([-_]|$)/i.test(item.lang));
+    const femaleNames = /helena|sabina|laura|elvira|dalia|silvia|monica|mónica|paulina|female|mujer/i;
+    return spanish.find((item) => femaleNames.test(item.name)) || spanish[0] || voices[0] || null;
+  }
   function voice(text) {
     if (!("speechSynthesis" in window)) return 1200;
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = "es-ES"; u.rate = 1.05;
-      const v = speechSynthesis.getVoices().find((x) => /es[-_]/.test(x.lang));
-      if (v) u.voice = v;
+      u.lang = "es-AR"; u.rate = 1.03; u.pitch = 1.08;
+      selectedVoice = preferredVoice();
+      if (selectedVoice) u.voice = selectedVoice;
       speechSynthesis.speak(u);
     } catch (e) {}
     return Math.max(1400, text.length * 62);
@@ -51,7 +58,7 @@
   async function agentSay(text, status) {
     const ms = voice(text);
     emit("agent", { text }, "speaking");
-    emit("speak", { env: envelope(ms), fps: 25, voz: "kore" });
+    emit("speak", { env: envelope(ms), fps: 25, voz: "femenina" });
     emit("metric", { stage: "tts", ms: 60 + Math.round(Math.random() * 40) });
     await sleep(ms);
     emit("status", {}, status || "idle");   // cierra el turno sin duplicar transcripción
@@ -84,11 +91,11 @@
     }
 
     if (/agent ?flow|agenda|centro de operaciones|publicidad/.test(t)) {
-      emit("agentflow", { phase: "start", agent: "GenBOT Voice Gateway" }, "thinking");
+      emit("agentflow", { phase: "start", agent: "Genie Voice Gateway" }, "thinking");
       await sleep(900);
       emit("metric", { stage: "flow", ms: 870 });
       emit("agentflow", { phase: "done", agent: "operations", run_id: "preview" }, "speaking");
-      return agentSay("GenBOT puede consultar calendario, reuniones, contactos y reportes mediante AgentFlow. Esta página lo simula; la ejecución real corre desde la computadora autorizada.");
+      return agentSay("Genie puede consultar calendario, reuniones, contactos y reportes mediante AgentFlow. Esta página presenta el flujo; la ejecución real corre desde la computadora autorizada.");
     }
     if (/controla.*pc|controlar.*pc|abre.*calculadora|computadora/.test(t)) {
       emit("pc_action", { ok: true, action: "vista previa" }, "executing");
@@ -107,7 +114,7 @@
     }
     if (/internet|conectado/.test(t)) {
       emit("metric", { stage: "router", ms: 2 });
-      return agentSay("Whisper y Gemma 4 corren localmente. AgentFlow se usa solo cuando GenBOT necesita consultar servicios y agentes remotos.");
+      return agentSay("En la computadora del stand, Whisper, Gemma 4 y mi voz Daniela corren localmente. AgentFlow se usa solo cuando Genie necesita servicios y agentes remotos.");
     }
     if (/foto/.test(t)) {
       await agentSay("¡Sonríe! Tres, dos, uno.", "executing");
@@ -165,14 +172,14 @@
       emit("orb_fx", { fx: "disintegrate" }, "executing");
       await sleep(1500);
       emit("orb_fx", { fx: "assemble" }, "idle");
-      return agentSay("Y de vuelta. Puro edge.");
+      return agentSay("Y de vuelta. Todo listo.");
     }
     if (/color/.test(t)) {
       emit("orb_fx", { fx: "color", hueA: 150 + Math.random() * 160, hueB: 180 + Math.random() * 120, sat: 80 }, "idle");
       return agentSay("¿Qué tal este?");
     }
     if (/hola|quien eres/.test(t)) {
-      return agentSay("Hola, soy GenBOT, el agente de voz de gen+. Escucho con Whisper, razono con Gemma 4 y conecto herramientas mediante AgentFlow.");
+      return agentSay("Hola, soy Genie, pronunciado Yeny. Soy el asistente inteligente de gen plus: escucho con Whisper, razono con Gemma 4 y conecto herramientas mediante AgentFlow.");
     }
     if (/adios|chau|gracias/.test(t)) return agentSay("¡Gracias por visitarnos! Pasa por el stand de gen+ y llévate tu diagnóstico.");
     emit("metric", { stage: "llm", ms: 900 + Math.round(Math.random() * 600) });
@@ -183,7 +190,7 @@
   const QUIZ = [
     { q: "¿Qué significa BIM: modelado de información de construcción, o manejo básico de inventarios?", a: "Modelado de información de construcción.", ok: true },
     { q: "Según la E punto cero treinta, ¿la deriva máxima en concreto armado es cero punto cero cero siete, o cero punto cero dos?", a: "Cero punto cero cero siete.", ok: true },
-    { q: "¿Un agente edge corre en la nube, o en un equipo local como este?", a: "En un equipo local. Por eso no dependo de internet.", ok: false },
+    { q: "¿Un asistente local corre en la nube, o en un equipo como el del stand?", a: "En el equipo del stand. Por eso la conversación puede seguir sin internet.", ok: false },
   ];
   async function quizFlow() {
     await agentSay("¡Va el quiz de inteligencia artificial en construcción! Tres preguntas rápidas.", "executing");
@@ -193,7 +200,7 @@
       await sleep(900);
       await userTurn(item.ok ? item.a : "mmm… ¿en la nube?");
       if (item.ok) { score++; await agentSay("¡Correcto!"); }
-      else await agentSay("Casi: corro aquí mismo, local. Esa es la gracia del edge.");
+      else await agentSay("Casi: el runtime completo corre localmente en la computadora del stand.");
     }
     emit("quiz_score", { score, total: QUIZ.length }, "speaking");
     await agentSay(`Hiciste ${score} de ${QUIZ.length}. ¿Entras al ranking del día? Escribe tu nombre en pantalla.`, "waiting");
@@ -209,7 +216,7 @@
       setTimeout(() => {
         if (this.onopen) this.onopen();
         emit("status", {}, "idle");
-        setTimeout(() => agentSay("Hola, soy GenBOT. Esta es la vista previa web: toca un ejemplo para probar el flujo."), 1400);
+        setTimeout(() => emit("agent", { text: "Hola, soy Genie, pronunciado Yeny. Toca una acción para probar esta demo interactiva." }, "idle"), 250);
         armIdle();
       }, 300);
     }
@@ -258,7 +265,6 @@
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
       emit("attract", {}, "idle");
-      voice("Acércate y pruébame: soy el agente de voz del stand de gen+.");
       armIdle();
     }, 45000);
   }
@@ -268,7 +274,18 @@
   window.fetch = function (url, opts) {
     const u = String(url);
     const json = (obj) => Promise.resolve(new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } }));
-    if (u.includes("/api/info")) return json({ assistant: "GenBOT", stt: "faster-whisper small", stt_device: "CUDA", brain: "gemma4:latest", tts: "Iapetus + Piper", tts_chip: "Iapetus", agentflow_host: "AgentFlow", agentflow_agent: true, to: "coordinación gen+" });
+    if (u.includes("/api/info")) return json({ assistant: "Genie", stt: "Whisper local", stt_device: "CUDA", brain: "gemma4:latest", tts: "Piper Daniela", tts_chip: "DANIELA", agentflow_host: "AgentFlow", agentflow_agent: true, to: "GEN+" });
+    if (u.includes("/api/preflight")) return json({
+      ready: true,
+      mode: "preview",
+      summary: { ok: 1, warn: 3, error: 0 },
+      checks: [
+        { id: "whisper", status: "warn", label: "Micrófono web", detail: "Interacción simulada en esta demo; Whisper CUDA opera en el runtime local.", action: "Usar la computadora del stand para voz real." },
+        { id: "model", status: "warn", label: "Gemma 4", detail: "Respuestas guiadas en la web; el modelo completo opera localmente.", action: "Abrir Genie en la computadora autorizada." },
+        { id: "voice", status: "ok", label: "Voz femenina", detail: "La demo usa una voz femenina española disponible en el navegador." },
+        { id: "agentflow", status: "warn", label: "AgentFlow", detail: "Flujos demostrativos en la web; ejecución real solo desde el runtime autorizado.", action: "Usar el entorno privado para acciones reales." }
+      ]
+    });
     if (u.includes("/api/stats")) return json(stats);
     if (u.includes("/api/salud")) return json({ ram_libre_gb: 9.4, ram_total_gb: 32 });
     if (u.includes("/api/mics")) return json({ mics: [{ id: 0, name: "Micrófono del stand (demo)", api: "WASAPI", current: true }] });
@@ -293,7 +310,7 @@
       const c = document.createElement("span");
       c.className = "chip";
       c.style.cssText = "color:#EED611;border-color:rgba(238,214,17,.4)";
-      c.innerHTML = '<span class="led" style="background:#EED611"></span>DEMO';
+      c.innerHTML = '<span class="led" style="background:#EED611"></span>DEMO WEB';
       chips.prepend(c);
     }
     if ("speechSynthesis" in window) speechSynthesis.getVoices();

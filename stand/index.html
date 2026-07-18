@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="es" data-theme="dark">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GenBOT · Edge Voice Agent · gen+</title>
-<script>
-  (function(){
-    var saved = localStorage.getItem('genbot-theme');
-    var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.dataset.theme = saved || (systemDark ? 'dark' : 'light');
-  })();
-</script>
+<meta name="theme-color" content="#040F20">
+<title>Genie · Asistente inteligente · gen+</title>
+<meta name="description" content="Demo comercial interactiva de Genie, pronunciado Yeny: asistente inteligente de GEN+ con voz, Gemma 4 local y conexión segura a AgentFlow.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23040f20' stroke='%233b82f6' stroke-width='4'/%3E%3Cpath d='M19 32h26M32 19v26' stroke='%23ff6b2b' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 
 <style>
   /* ── Plus Jakarta Sans local (el stand es offline: nada de Google Fonts) ───── */
@@ -19,116 +16,78 @@
   @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
   @font-face{font-family:"Plus Jakarta Sans";src:url("static/fonts/PlusJakartaSans-ExtraBold.woff2") format("woff2");font-weight:800;font-display:swap}
 
-  @property --brand-hue{syntax:"<number>";inherits:true;initial-value:260}
+  @property --brand-hue{syntax:"<number>";inherits:true;initial-value:250}
 
-  /* ── Tokens GEN+ Design System (DESIGN.md §11, tema DARK consolidado) ────────
-     17-jul: se funden aquí el bloque light original y el parche dark del 16-jul
-     (pedido de Emanuel). Una sola fuente de verdad; un solo lienzo navy. */
+  /* ── Tokens GEN+ Design System (DESIGN.md, tema LIGHT) ─────────────────────── */
   :root{
-    --brand-hue:260;
+    color-scheme:dark;
+    --brand-hue:250; --brand-chroma:.07;
     --font-jakarta:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
     --font-mono:Menlo,Consolas,ui-monospace,monospace;
 
-    /* Rampa azul de marca (DESIGN.md §4). pale/medium/ice retonados para navy. */
-    --blue-primary:oklch(62% .245 var(--brand-hue));
-    --blue-bright:oklch(59% .22 var(--brand-hue));
-    --blue-light:oklch(68% .19 var(--brand-hue));
-    --blue-sky:oklch(75% .14 var(--brand-hue));
-    --blue-deep-navy:oklch(31% .12 var(--brand-hue));
-    --blue-dark:oklch(39% .15 var(--brand-hue));
-    --blue-pale:oklch(78% .12 var(--brand-hue));
-    --blue-medium:oklch(81% .1 var(--brand-hue));
-    --blue-ice:oklch(68% .19 var(--brand-hue) / .14);
+    --blue-primary:#2165FF; --blue-light:#4D84FF; --blue-sky:#6A98FF;
+    --blue-pale:#BACFFF; --blue-ice:#E9F0FF; --blue-deep-navy:#0E2A6B; --blue-medium:#1748B5;
 
-    --background:#040F20; --surface:#06142A; --surface-subtle:#0A1D3D; --surface-raised:#0A244C;
-    --border:rgba(122,168,255,.15); --border-strong:rgba(122,168,255,.34);
-    --text-primary:#EAF0FF; --text-secondary:#B9C7E4; --text-muted:#7E93BC;
-    --primary:var(--blue-primary);--primary-hover:var(--blue-bright);
-    --focus-ring:oklch(74% .14 var(--brand-hue) / .42);
-    --success:oklch(70% .2 148);--warning:oklch(88% .18 101);--danger:oklch(63% .24 28);
+    --background:#FFFFFF; --surface:#FFFFFF; --surface-subtle:#F4F7FF; --surface-raised:#FFFFFF;
+    --border:#DCE5F2; --border-strong:#B3BBC8;
+    --text-primary:#101828; --text-secondary:#53657D; --text-muted:#7A8AA0;
+    --primary:#2165FF; --primary-hover:#1E5CE8; --focus-ring:rgba(33,101,255,.35);
+    --cta:#FF6B2B; --cta-hover:#FF7B42; --cta-press:#E9581F;
+    --success:#19C356; --warning:#EED611; --danger:#EE1211;
 
-    /* Marca: gradiente oficial (DESIGN.md §4) + CTA + glow sobrio */
-    --gradient-brand:linear-gradient(165deg,var(--blue-deep-navy),var(--blue-dark) 32%,var(--blue-bright) 68%,var(--blue-light));
-    --gradient-cta:linear-gradient(135deg,var(--blue-bright),var(--blue-light));
-    --glow-primary:0 0 24px rgba(59,110,255,.32);
-
-    /* Escenario del orbe: la mezcla aditiva de las particulas pide navy profundo. */
+    /* El escenario del orbe conserva su paleta oscura: la mezcla aditiva de las
+       particulas necesita fondo navy para brillar. Interfaz clara, lienzo oscuro. */
     --stage-bg:#040F20; --stage-glow:#07193a;
     --stage-fg:#FFFFFF; --stage-fg-2:rgba(255,255,255,.58);
 
     --radius-xs:4px; --radius-sm:8px; --radius-md:10px; --radius-lg:12px; --radius-xl:16px; --radius-full:999px;
-    --shadow-sm:0 2px 8px rgba(0,0,0,.35);
-    --shadow-md:0 12px 28px rgba(0,0,0,.5);
-    color-scheme:dark;
-  }
-  html[data-theme="light"]{
-    --background:#F4F7FC;--surface:#FFFFFF;--surface-subtle:#EDF3FF;--surface-raised:#E4ECFA;
-    --border:rgba(14,42,107,.13);--border-strong:rgba(14,42,107,.26);
-    --text-primary:#081A36;--text-secondary:#344765;--text-muted:#687A94;
-    --blue-pale:oklch(57% .16 var(--brand-hue));--blue-medium:oklch(52% .19 var(--brand-hue));
-    --blue-ice:oklch(62% .245 var(--brand-hue) / .09);
-    --shadow-sm:0 2px 8px rgba(14,42,107,.08);--shadow-md:0 16px 36px rgba(14,42,107,.14);
-    color-scheme:light;
-  }
-  html.theme-transition-off *,html.theme-transition-off *::before,html.theme-transition-off *::after{
-    transition:none!important;animation-duration:0s!important
+    --shadow-sm:0 2px 8px rgba(16,49,124,.06);
+    --shadow-md:0 12px 28px rgba(16,49,124,.10);
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+       text-rendering:optimizeLegibility;-webkit-text-size-adjust:100%}
   body{
     background:var(--background); color:var(--text-primary);
     font-family:var(--font-jakarta); font-weight:400;
-    height:100vh;height:100dvh;overflow:hidden;
+    height:100vh; overflow:hidden;
     font-variant-numeric:tabular-nums;
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   }
   .mono{font-family:var(--font-mono)}
   .cap{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
 
   /* ── Estructura: header / escenario+rail / barra telemetría ────────────────── */
-  .app{display:grid;grid-template-rows:56px minmax(0,1fr);height:100vh;height:100dvh}
+  .app{display:grid;grid-template-rows:56px 1fr;height:100vh;min-width:0}
 
   header{
     display:flex;align-items:center;justify-content:space-between;gap:24px;
-    position:relative;z-index:20;
-    padding:0 24px;border-bottom:1px solid var(--border);
-    background:rgba(6,20,42,.78);
-    backdrop-filter:blur(18px) saturate(1.3);
-    -webkit-backdrop-filter:blur(18px) saturate(1.3);
+    min-width:0;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);
   }
-  html[data-theme="light"] header{background:rgba(255,255,255,.82)}
-  html[data-theme="light"] .brand img{filter:brightness(0) saturate(100%) invert(16%) sepia(78%) saturate(1890%) hue-rotate(210deg)}
-  /* Hairline de marca bajo el header: la firma visual gen+ sin gritar */
-  header::after{
-    content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
-    background:var(--gradient-brand);opacity:.55;pointer-events:none;
-  }
-  .brand{display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:16px;flex:none}
   .brand img{height:22px;width:auto;display:block}      /* proporción intacta */
-  /* Versión del producto: gradiente de marca, discreto y poderoso */
-  .brand .ver{
-    font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;
-    color:#fff;padding:3px 9px;border-radius:var(--radius-full);
-    background:var(--gradient-cta);box-shadow:0 0 14px rgba(59,110,255,.28)}
-  .brand .net{
-    display:inline-flex;align-items:center;gap:6px;
-    font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--text-muted)}
-  .brand .net .led{width:6px;height:6px;border-radius:50%;background:var(--success);
-    box-shadow:0 0 8px rgba(25,195,86,.7);animation:led 2.6s ease-in-out infinite}
+  .brand .sep{width:1px;height:20px;background:var(--border)}
+  .brand .mod{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--text-secondary);white-space:nowrap}
+  .brand .mod{color:var(--blue-pale);font-size:14px;letter-spacing:.18em}
+  .tech-chip{display:none!important}
 
-  .chips{display:flex;align-items:center;gap:8px}
+  .chips{display:flex;align-items:center;gap:8px;min-width:0;overflow-x:auto}
   .chip{
     display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;
     background:var(--surface-subtle);border:1px solid var(--border);border-radius:var(--radius-full);
-    font-size:11px;font-weight:600;color:var(--text-secondary);white-space:nowrap;
+    font-size:11px;font-weight:600;color:var(--text-secondary);white-space:nowrap;flex:none;
   }
   .chip .led{width:6px;height:6px;border-radius:50%;background:var(--text-muted);flex:none}
   .chip.up .led{background:var(--success)}
+  .chip.warn .led{background:var(--warning)}
   .chip.down .led{background:var(--danger)}
   .chip b{color:var(--text-primary);font-weight:600}
   .mic-btn{cursor:pointer;font-family:var(--font-jakarta);color:var(--blue-medium);
            border-color:var(--blue-pale);background:var(--blue-ice)}
-  .mic-btn:hover{background:var(--surface-raised)}
+  .mic-btn:hover{background:#dbe7ff}
+  .kbtn,.mic-btn{cursor:pointer;font-family:var(--font-jakarta)}
+  button:focus-visible,.mic-item:focus-visible{outline:none;
+    box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--blue-light)}
 
   /* ── Panel de micrófono ─────────────────────────────────────────────────────── */
   .mic-panel{position:fixed;top:64px;right:16px;z-index:50;width:360px;background:var(--surface);
@@ -139,8 +98,9 @@
                 color:var(--text-muted);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
   .mic-panel h3 button{border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1}
   .mic-list{max-height:220px;overflow-y:auto;margin:0 -4px;padding:0 4px}
-  .mic-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border);
-            border-radius:var(--radius-md);margin-bottom:6px;cursor:pointer;font-size:12.5px;color:var(--text-secondary)}
+  .mic-item{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:1px solid var(--border);
+            border-radius:var(--radius-md);margin-bottom:6px;cursor:pointer;font:500 12.5px var(--font-jakarta);
+            text-align:left;background:transparent;color:var(--text-secondary)}
   .mic-item:hover{background:var(--surface-subtle)}
   .mic-item.sel{border-color:var(--blue-primary);background:var(--blue-ice);color:var(--text-primary)}
   .mic-item .radio{width:12px;height:12px;border-radius:50%;border:2px solid var(--border-strong);flex:none}
@@ -157,49 +117,41 @@
   .mic-res.show{display:block}
   .mic-res .lvl{height:6px;border-radius:99px;background:var(--border);overflow:hidden;margin:7px 0 3px}
   .mic-res .lvl i{display:block;height:100%;background:var(--blue-primary);width:0%;transition:width .3s ease}
-  .mic-res.ok{border-color:color-mix(in oklch,var(--success),transparent 45%);background:color-mix(in oklch,var(--success),var(--surface) 90%)}
-  .mic-res.ok b{color:var(--success)}
+  .mic-res.ok{border-color:#A8E6C1;background:var(--okB, #E6F9EE)}
+  .mic-res.ok b{color:#0B7A34}
 
-  /* ── Panel Sistema (desplegable): la telemetría vive aquí, no a la vista ───── */
-  .sys-panel{position:fixed;top:64px;right:16px;z-index:50;width:420px;background:var(--surface);
-             border:1px solid var(--border-strong);border-radius:var(--radius-xl);
-             box-shadow:0 18px 42px rgba(0,0,0,.6);padding:16px;display:none}
-  .sys-panel.open{display:block}
-  .sys-panel h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
-                color:var(--text-muted);margin:0 0 12px;display:flex;align-items:center;gap:8px}
-  .sys-panel h3 .sys-sub{font-weight:600;letter-spacing:.04em;text-transform:none;opacity:.7}
-  .sys-panel h3 button{margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1}
-  .sys-chips{display:flex;flex-wrap:wrap;gap:8px}
-  .sys-panel .telem{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:12px;
-                    border-top:1px solid var(--border);
-                    font-family:var(--font-mono);font-size:11px;color:var(--text-muted)}
-  .sys-panel .telem .l,.sys-panel .telem .r{display:flex;flex-wrap:wrap;gap:12px}
-  .sys-panel .telem b{color:var(--blue-medium);font-weight:600}
-  .sys-panel .telem .k{color:var(--text-muted)}
-  /* LED del botón Sistema: verde salvo que el cerebro o la conexión caigan */
-  #sys-led{background:var(--success)}
-  body:has(#c-llm.down) #sys-led,body:has(#c-ws.down) #sys-led{background:var(--danger)}
-  body:has(#c-ram.crit) #sys-led{background:var(--danger)}
-  body:has(#c-ram.warn) #sys-led{background:var(--warning)}
+  /* ── Preflight del sistema: el operador ve bloqueos antes de abrir el stand ─ */
+  .system-panel{position:fixed;top:64px;right:16px;z-index:52;width:min(440px,calc(100vw - 32px));
+    max-height:calc(100vh - 84px);overflow:auto;background:var(--surface);border:1px solid var(--border-strong);
+    border-radius:var(--radius-xl);box-shadow:0 18px 42px rgba(0,0,0,.55);padding:16px;display:none}
+  .system-panel.open{display:block}
+  .system-panel h3{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
+  .system-panel h3 button{width:44px;height:44px;border:0;background:transparent;color:var(--text-muted);
+    border-radius:var(--radius-md);cursor:pointer;font-size:16px}
+  .sys-summary{font-size:13px;color:var(--text-secondary);margin-bottom:12px;text-wrap:pretty}
+  .sys-checks{display:grid;gap:6px}
+  .sys-row{display:grid;grid-template-columns:10px minmax(0,1fr);gap:10px;padding:10px 12px;
+    border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-subtle)}
+  .sys-row .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;background:var(--text-muted)}
+  .sys-row.ok .dot{background:var(--success)} .sys-row.warn .dot{background:var(--warning)}
+  .sys-row.error .dot{background:var(--danger)}
+  .sys-row b{display:block;font-size:12.5px;color:var(--text-primary)}
+  .sys-row p{font-size:11.5px;line-height:16px;color:var(--text-secondary);overflow-wrap:anywhere}
+  .sys-row small{display:block;margin-top:3px;color:var(--text-muted);font-size:10.5px;line-height:15px}
+  .sys-refresh{width:100%;min-height:44px;margin-top:12px;border:0;border-radius:var(--radius-md);
+    background:var(--blue-primary);color:#fff;font:600 13px var(--font-jakarta);cursor:pointer}
+  .sys-refresh:disabled{opacity:.55;cursor:wait}
 
-  main{display:grid;grid-template-columns:minmax(0,1fr) 372px;min-height:0;overflow:hidden}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 372px;min-width:0;min-height:0}
 
   /* ── Escenario del orbe ────────────────────────────────────────────────────── */
   /* Columna en flujo normal: el orbe toma el espacio libre y el resto se apila debajo.
      (Antes iba todo en absolute con numeros magicos y se pisaba al meter botones.) */
   /* Lienzo oscuro dentro de la interfaz clara: sin navy, el orbe no brilla. */
   .stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
-         gap:16px;padding:16px 24px 20px;min-height:0;color:var(--stage-fg);
-         overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
-         justify-content:safe center;
-         background:
-           radial-gradient(620px 420px at 78% 8%,rgba(18,56,140,.34) 0%,transparent 62%),
-           radial-gradient(900px 700px at 50% 42%,var(--stage-glow) 0%,var(--stage-bg) 72%)}
-  /* Grano fotográfico sutil: quita el look "flat de software" al lienzo (2.5%) */
-  .stage::after{
-    content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .025 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+         gap:16px;padding:16px 24px 20px;min-width:0;min-height:0;color:var(--stage-fg);
+         background:radial-gradient(900px 700px at 50% 42%,var(--stage-glow) 0%,var(--stage-bg) 72%)}
   .grid-bg{position:absolute;inset:0;pointer-events:none;opacity:.5;
     background-image:linear-gradient(rgba(77,132,255,.05) 1px,transparent 1px),
                      linear-gradient(90deg,rgba(77,132,255,.05) 1px,transparent 1px);
@@ -213,12 +165,14 @@
                 letter-spacing:.1em;text-transform:uppercase;
                 background:rgba(77,132,255,.14);color:var(--blue-pale);border:1px solid rgba(77,132,255,.35)}
 
-  .caption{text-align:center;padding:0 40px;width:min(860px,100%);max-width:100%;min-width:0;flex:none}
+  .caption{text-align:center;padding:0 40px;max-width:860px;flex:none}
   .you{font-size:15px;line-height:22px;color:var(--blue-pale);min-height:22px;font-weight:500}
   .you .cursor{display:inline-block;width:7px;height:15px;background:var(--blue-light);
                margin-left:3px;vertical-align:-2px;animation:blink 1s step-end infinite}
   @keyframes blink{50%{opacity:0}}
-  .agent{font-size:20px;line-height:28px;font-weight:600;color:var(--stage-fg);min-height:28px;margin-top:6px;overflow-wrap:anywhere}
+  .agent{font-size:20px;line-height:28px;font-weight:600;color:var(--stage-fg);min-height:28px;margin-top:6px}
+  /* En reposo no reservar lineas vacias: en pantallas bajas las acciones deben quedar visibles. */
+  .caption:has(#you:empty):has(#agent:empty){display:none}
   .voz-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;vertical-align:2px;
            font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.06em;
            padding:2px 6px;border-radius:var(--radius-xs);
@@ -232,7 +186,7 @@
   .tr .q{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);display:block;margin-bottom:2px}
 
   /* ── Controles (tamaños/estados del brandbook §7) ──────────────────────────── */
-  .controles{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;min-width:0;flex:none}
+  .controles{display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
   .gen-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;
     border:1px solid transparent;font-family:var(--font-jakarta);font-weight:600;white-space:nowrap;
     cursor:pointer;
@@ -242,19 +196,15 @@
   .gen-button:disabled{cursor:not-allowed;opacity:.5}
 
   .btn-hablar{height:48px;padding:0 24px;font-size:16px;border-radius:var(--radius-lg);
-              background:var(--gradient-cta);color:#fff;box-shadow:var(--glow-primary)}
-  .btn-hablar:hover:not(:disabled){filter:brightness(1.12)}
-  .btn-hablar.rec{background:var(--danger);color:#fff;box-shadow:0 0 24px rgba(238,18,17,.32)}
+              background:var(--cta);color:#211006}
+  .btn-hablar:hover:not(:disabled){background:var(--cta-hover)}
+  .btn-hablar:active:not(:disabled){background:var(--cta-press)}
+  .btn-hablar.rec{background:var(--danger);color:#fff}
   .btn-hablar .ico{width:16px;height:16px;border-radius:50%;background:currentColor;opacity:.9}
   .btn-hablar.rec .ico{animation:lat 1s ease-in-out infinite}
   @keyframes lat{50%{opacity:.35}}
 
-  /* Funcionalidades organizadas por categoría (v4): filas con etiqueta */
-  .ejemplos{display:flex;flex-direction:column;gap:7px;align-items:center;width:100%;min-width:0}
-  .ej-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
-  .ej-tag{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
-          color:rgba(143,176,255,.75);min-width:76px;text-align:right;padding-right:4px;
-          font-family:var(--font-mono)}
+  .ejemplos{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
   /* Dentro del escenario oscuro: blancos translucidos, no los tokens light */
   .btn-ej{height:32px;padding:0 12px;font-size:12px;border-radius:var(--radius-sm);
           background:rgba(255,255,255,.07);color:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.16)}
@@ -263,6 +213,17 @@
   .hint-k{font-size:11px;color:var(--stage-fg-2)}
   .hint-k kbd{font-family:var(--font-mono);background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
               border-radius:var(--radius-xs);padding:1px 5px;font-size:10px}
+  .more-actions{width:min(760px,100%);text-align:center}
+  .more-actions summary{display:inline-flex;align-items:center;justify-content:center;min-height:32px;
+    padding:0 12px;border-radius:var(--radius-sm);cursor:pointer;list-style:none;
+    color:var(--stage-fg-2);font-size:11px;border:1px solid transparent}
+  .more-actions summary::-webkit-details-marker{display:none}
+  .more-actions summary::after{content:'+';margin-left:7px;font-size:15px;color:var(--blue-pale)}
+  .more-actions[open] summary::after{content:'−'}
+  .more-actions summary:hover{color:#fff;border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.05)}
+  .extra-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:7px;
+    padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-lg);
+    background:rgba(3,13,30,.72)}
 
   /* ── Popup de correo (el visitante TECLEA su correo, no lo dicta) ──────────── */
   .modal-bg{position:fixed;inset:0;z-index:80;background:rgba(4,15,32,.48);display:none;
@@ -302,7 +263,7 @@
   .arrow{align-self:center;color:rgba(255,255,255,.28);font-size:11px}
 
   /* ── Rail derecho ──────────────────────────────────────────────────────────── */
-  .rail{border-left:1px solid var(--border);background:var(--surface);
+  .rail{min-width:0;border-left:1px solid var(--border);background:var(--surface);
         display:grid;grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);min-height:0}
   .rail section{padding:16px 20px;min-height:0;display:flex;flex-direction:column}
   .rail section + section{border-top:1px solid var(--border)}
@@ -310,26 +271,16 @@
   .scroll{overflow-y:auto;min-height:0;margin:0 -20px;padding:0 20px}
   .scroll::-webkit-scrollbar{width:6px}
   .scroll::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:99px}
-  .stage::-webkit-scrollbar,.rail::-webkit-scrollbar{width:8px}
-  .stage::-webkit-scrollbar-track,.rail::-webkit-scrollbar-track{background:transparent}
-  .stage::-webkit-scrollbar-thumb,.rail::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:99px}
-  .stage,.rail{scrollbar-color:var(--border-strong) transparent;scrollbar-width:thin}
 
   .card{display:flex;align-items:center;justify-content:space-between;gap:12px;
         padding:10px 12px;background:var(--surface-subtle);border:1px solid var(--border);
         border-radius:var(--radius-lg);margin-bottom:6px}
-  .card.live{border-color:var(--blue-primary);background:var(--blue-ice);
-             box-shadow:var(--shadow-sm),0 0 18px rgba(59,110,255,.12)}
-  .vtag{font-family:var(--font-mono);font-size:9px;font-weight:600;color:var(--blue-pale);
-        background:rgba(77,132,255,.14);border:1px solid rgba(77,132,255,.3);
-        border-radius:var(--radius-xs);padding:1px 5px;margin-left:6px;vertical-align:1px}
+  .card.live{border-color:var(--blue-primary);background:var(--blue-ice);box-shadow:var(--shadow-sm)}
   .card .n{font-size:13px;font-weight:600;line-height:18px}
   .card .s{font-size:11px;line-height:15px;color:var(--text-muted);margin-top:1px}
   .badge{font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:var(--radius-xs);white-space:nowrap}
-  .badge.on{background:var(--blue-primary);color:#fff;border:1px solid var(--blue-primary)}
+  .badge.on{background:oklch(.46 .18 250);color:#fff;border:1px solid oklch(.54 .18 250)}
   .badge.soon{background:var(--surface-subtle);color:var(--text-muted);border:1px solid var(--border)}
-  .badge.local{background:rgba(35,194,127,.12);color:var(--success);border:1px solid rgba(35,194,127,.38)}
-  .badge.beta{background:rgba(238,214,17,.10);color:#d8bf13;border:1px solid rgba(238,214,17,.34)}
 
   /* Los que aun no corren van densos y en gris: presentes en el catalogo, sin fingir que estan vivos */
   .row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:var(--radius-sm)}
@@ -353,22 +304,36 @@
   .st.ok{color:#0B7A34} .st.bad{color:#A81210} .st.wait{color:var(--blue-medium)}
   .empty{font-size:12px;color:var(--text-muted);padding:4px 0}
 
-  /* (la telemetría vive dentro del panel Sistema; ver .sys-panel .telem) */
+  /* ── Barra de telemetría ───────────────────────────────────────────────────── */
+  .telem{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:0;
+         padding:0 24px;background:var(--surface-subtle);border-top:1px solid var(--border);
+         font-family:var(--font-mono);font-size:11px;color:var(--text-muted);overflow:hidden;white-space:nowrap}
+  .telem .l,.telem .r{display:flex;align-items:center;gap:18px}
+  .telem b{color:var(--blue-medium);font-weight:600}
+  .telem .k{color:var(--text-muted)}
+  .telem{display:none}
+  #stand-stats{display:none!important}
+  .pipe{display:none}
 </style>
+</head>
+<body>
 
 <div class="app">
   <header>
     <div class="brand">
       <img src="static/gen-logo-white.png" alt="gen+">
-      <span class="ver">v6.0</span>
-      <span class="net"><span class="led"></span>VISTA PREVIA</span>
+      <span class="sep"></span>
+      <span class="mod">GENIE</span>
     </div>
     <div class="chips" id="chips">
-      <button class="chip kbtn" id="btn-sys" title="Estado del sistema">
-        <span class="led" id="sys-led"></span>Sistema
-      </button>
-      <button class="chip kbtn" id="btn-full" title="Pantalla completa (modo stand)">⛶</button>
-      <button class="chip kbtn" id="btn-theme" type="button" title="Cambiar tema" aria-label="Cambiar tema"><span aria-hidden="true">◐</span><span class="theme-label">Tema</span></button>
+      <span class="chip tech-chip" id="c-stt"><span class="led"></span>STT <b>—</b></span>
+      <span class="chip tech-chip" id="c-llm"><span class="led"></span>LLM <b>—</b></span>
+      <span class="chip tech-chip" id="c-tts"><span class="led"></span>TTS <b>—</b></span>
+      <span class="chip tech-chip" id="c-flow"><span class="led"></span>Agent Flow <b>—</b></span>
+      <span class="chip tech-chip" id="c-ws"><span class="led"></span>UI</span>
+      <span class="chip ram tech-chip" id="c-ram" title="RAM libre del equipo"><span class="led"></span>RAM <b id="ram-v">—</b></span>
+      <button class="chip kbtn" id="btn-system" title="Verificar sistema" aria-label="Verificar sistema" aria-expanded="false"><span class="led"></span>Sistema <b id="sys-ready">—</b></button>
+      <button class="chip kbtn" id="btn-full" title="Pantalla completa (modo stand)" aria-label="Pantalla completa">⛶</button>
       <button class="chip kbtn" id="btn-limpiar" title="Limpiar pantalla entre visitantes">Limpiar</button>
       <button class="chip mic-btn" id="btn-mic" title="Configurar micrófono">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
@@ -379,33 +344,6 @@
       </button>
     </div>
   </header>
-
-  <!-- Panel Sistema (desplegable): telemetría técnica fuera de la vista del visitante -->
-  <div class="sys-panel" id="sys-panel">
-    <h3>Sistema <span class="sys-sub">telemetría del equipo</span> <button id="sys-close" aria-label="Cerrar">✕</button></h3>
-    <div class="sys-chips">
-      <span class="chip" id="c-stt"><span class="led"></span>Oído <b>—</b></span>
-      <span class="chip" id="c-llm"><span class="led"></span>Cerebro <b>—</b></span>
-      <span class="chip" id="c-tts"><span class="led"></span>Voz <b>—</b></span>
-      <span class="chip" id="c-flow"><span class="led"></span>Agent Flow <b>—</b></span>
-      <span class="chip" id="c-ws"><span class="led"></span>Pantalla</span>
-      <span class="chip ram" id="c-ram" title="RAM libre del equipo"><span class="led"></span>RAM <b id="ram-v">—</b></span>
-    </div>
-    <div class="telem">
-      <div class="l">
-        <span><span class="k">oído</span> <b id="t-stt">—</b></span>
-        <span><span class="k">cerebro</span> <b id="t-llm">—</b></span>
-        <span><span class="k">flow</span> <b id="t-flow">—</b></span>
-        <span><span class="k">voz</span> <b id="t-tts">—</b></span>
-        <span><span class="k">total</span> <b id="t-total">—</b></span>
-      </div>
-      <div class="r">
-        <span id="t-stack" class="k">—</span>
-        <span><span class="k">destino</span> <b id="t-to">—</b></span>
-        <span><span class="k">uptime</span> <b id="t-up">00:00</b></span>
-      </div>
-    </div>
-  </div>
 
   <div class="modal-bg" id="em-modal">
     <div class="modal">
@@ -434,7 +372,7 @@
     </div>
   </div>
 
-  <div class="mic-panel" id="mic-panel">
+  <div class="mic-panel" id="mic-panel" role="dialog" aria-label="Configurar micrófono">
     <h3>Micrófono <button id="mic-close" aria-label="Cerrar">✕</button></h3>
     <div class="mic-list" id="mic-list"><div class="empty">Cargando…</div></div>
     <div class="mic-test">
@@ -443,10 +381,16 @@
     <div class="mic-res" id="mic-res"></div>
   </div>
 
+  <div class="system-panel" id="system-panel" role="dialog" aria-labelledby="system-title" aria-hidden="true">
+    <h3 id="system-title">Estado operativo <button id="system-close" aria-label="Cerrar verificación">✕</button></h3>
+    <div class="sys-summary" id="sys-summary" aria-live="polite">Comprobando equipo y conexiones…</div>
+    <div class="sys-checks" id="sys-checks"><div class="empty">Cargando diagnóstico…</div></div>
+    <button class="sys-refresh" id="sys-refresh">Volver a comprobar hardware</button>
+  </div>
+
   <main>
     <div class="stage">
       <div class="grid-bg"></div>
-      <div class="scan"></div>
       <div class="estado"><span class="pill" id="pill">EN REPOSO</span></div>
       <div id="attract-badge"><span class="wave">👋</span><span id="attract-txt">Acércate y háblame</span></div>
       <div id="clima-card">
@@ -476,14 +420,7 @@
         <div id="norma-a">Consultando la norma…</div>
         <div id="norma-src"></div>
       </div>
-      <div class="orb-shell">
-        <div class="orb-halo"></div>
-        <div class="orb-ring r1"></div>
-        <div class="orb-ring r2"></div>
-        <div class="orb-ring r3"></div>
-        <div class="orb-pulse"></div>
-        <canvas id="orb"></canvas>
-      </div>
+      <canvas id="orb"></canvas>
       <div class="caption">
         <div class="you" id="you"></div>
         <div class="agent"><span id="agent"></span><span id="voz"></span></div>
@@ -494,94 +431,59 @@
           <span class="ico"></span><span id="btn-hablar-t">Hablar</span>
         </button>
         <div class="ejemplos" id="ejemplos">
-          <div class="ej-tabs" id="ej-tabs" role="tablist" aria-label="Categorías">
-            <button class="ej-tab on" data-cat="conversa">GenBOT</button>
-            <button class="ej-tab" data-cat="ingenieria">Ingeniería</button>
-            <button class="ej-tab" data-cat="vision">Visión</button>
-            <button class="ej-tab" data-cat="agentes">Agentes</button>
-            <button class="ej-tab" data-cat="mundo3d">Mundo 3D</button>
-            <button class="ej-tab" data-cat="apps">Ecosistema</button>
-          </div>
-          <div class="ej-panel on" data-cat="conversa">
-            <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
-            <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
-            <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz con ranking</button>
-            <button class="gen-button btn-ej" data-t="abre la calculadora">Controlar la PC</button>
-            <button class="gen-button btn-ej" data-t="desintégrate">Efecto del orbe</button>
-            <button class="gen-button btn-ej" data-cool="20000"
-                    data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">
-              Enviar un correo</button>
-          </div>
-          <div class="ej-panel" data-cat="ingenieria">
-            <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio en vivo</button>
+          <button class="gen-button btn-ej" data-t="¿qué es gen+?">¿Qué es gen+?</button>
+          <button class="gen-button btn-ej" data-t="¿esto usa internet?">¿Usa internet?</button>
+          <button class="gen-button btn-ej" data-cool="12000" data-t="consulta en Agent Flow mi agenda de hoy">Consultar AgentFlow</button>
+          <button class="gen-button btn-ej" data-t="inicia el quiz">Quiz</button>
+          <button class="gen-button btn-ej" data-t="abre AI Process">Abrir AI Process</button>
+          <button class="gen-button btn-ej" data-t="abre la calculadora">Controlar la PC</button>
+        </div>
+        <details class="more-actions">
+          <summary>Más capacidades</summary>
+          <div class="extra-actions">
+            <button class="gen-button btn-ej" data-cool="20000" data-t="envía un correo contando que estoy en el stand de gen+ en el AI Construction Summit">Enviar un correo</button>
+            <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
+            <button class="gen-button btn-ej" data-cool="120000" data-t="modela un edificio de 8 pisos en etabs">Edificio ETABS</button>
             <button class="gen-button btn-ej" data-t="cumple las derivas">¿Cumple la norma?</button>
             <button class="gen-button btn-ej" data-cool="10000" data-t="según la norma, ¿cuál es la deriva máxima en concreto armado?">Consultar la norma</button>
             <button class="gen-button btn-ej" data-cool="60000" data-t="envíame el informe del edificio">Informe a mi correo</button>
-          </div>
-          <div class="ej-panel" data-cat="vision">
+            <button class="gen-button btn-ej" data-t="¿qué temperatura hace en lima?">Clima en Lima</button>
             <button class="gen-button btn-ej" data-cool="15000" data-t="activa la cámara de detección">Detección en vivo</button>
             <button class="gen-button btn-ej" data-cool="12000" data-t="¿qué ves?">¿Qué ves?</button>
-            <button class="gen-button btn-ej" data-t="tómame una foto">Tomar una foto</button>
-          </div>
-          <div class="ej-panel" data-cat="agentes">
-            <button class="gen-button btn-ej" data-cool="12000" data-t="consulta en Agent Flow mi agenda de hoy">Mi agenda</button>
-            <button class="gen-button btn-ej" data-cool="12000" data-t="consulta en Agent Flow mis archivos de Drive">Buscar en Drive</button>
-            <button class="gen-button btn-ej" data-cool="12000" data-t="pregunta al centro de operaciones por publicidad">Analizar Ads</button>
-            <button class="gen-button btn-ej" data-t="abre AgentFlow">Centro de operaciones</button>
-          </div>
-          <div class="ej-panel" data-cat="mundo3d">
             <button class="gen-button btn-ej" data-cool="10000" data-t="abre la ciudad">Ciudad 3D</button>
             <button class="gen-button btn-ej" data-cool="10000" data-t="abre el edificio de ainy">Edificio Ainy</button>
           </div>
-          <div class="ej-panel" data-cat="apps">
-            <a class="btn-app" href="leaderboard.html" target="_blank" rel="noopener">Ranking del día</a>
-            <a class="btn-app" href="https://apalpan.github.io/gen-plus-ai-process/" target="_blank" rel="noopener">AI Process <span class="ext">↗</span></a>
-            <a class="btn-app" href="https://apalpan.github.io/trainermath-ai-core/" target="_blank" rel="noopener">TrainerMath <span class="ext">↗</span></a>
-            <a class="btn-app" href="https://apalpan.github.io/aecode-visionpro-live/" target="_blank" rel="noopener">VisionPro en vivo <span class="ext">↗</span></a>
-            <a class="btn-app" href="https://apalpan.github.io/aecode-visionpro-computervision-lab/" target="_blank" rel="noopener">Visión computacional <span class="ext">↗</span></a>
-            <a class="btn-app" href="https://apalpan.github.io/AI-Construction-Summit-Estatus/" target="_blank" rel="noopener">Summit <span class="ext">↗</span></a>
-            <a class="btn-app" href="https://apalpan.github.io/state-of-ai-aec/" target="_blank" rel="noopener">State of AI AEC <span class="ext">↗</span></a>
-          </div>
-        </div>
+        </details>
+        <div class="hint-k">Habla o elige una acción · <kbd>Enter</kbd> también funciona</div>
       </div>
 
       <div class="pipe" id="pipe">
-        <span class="node" data-s="mic">ESCUCHA</span><span class="arrow">→</span>
-        <span class="node" data-s="stt">ENTIENDE<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="router">DECIDE<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="llm">RAZONA<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="flow">CONECTA<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="etabs">CALCULA<span class="ms"></span></span><span class="arrow">→</span>
-        <span class="node" data-s="tts">HABLA<span class="ms"></span></span>
+        <span class="node" data-s="mic">MIC</span><span class="arrow">→</span>
+        <span class="node" data-s="stt">WHISPER<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="router">ROUTER<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="llm">GEMMA<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="flow">AGENT FLOW<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="etabs">ETABS<span class="ms"></span></span><span class="arrow">→</span>
+        <span class="node" data-s="tts">PIPER<span class="ms"></span></span>
       </div>
     </div>
 
     <aside class="rail">
       <section>
-        <h2 class="cap">Agentes</h2>
+        <h2 class="cap">Capacidades en vivo</h2>
         <div class="scroll">
           <div class="card live">
-            <div><div class="n">GenBOT local <span class="vtag">v6.1</span></div><div class="s">Whisper + Gemma 4 + Piper en la computadora del stand</div></div>
-            <span class="badge local">EN STAND</span>
+            <div><div class="n">Runtime Genie</div><div class="s">Whisper, Gemma 4 y Daniela en la computadora del stand</div></div>
+            <span class="badge on">EQUIPO</span>
           </div>
           <div class="card live">
-            <div><div class="n">Correo e informes <span class="vtag">v2.1</span></div><div class="s">Redacción local y entrega trazable mediante AgentFlow</div></div>
-            <span class="badge on">EN STAND</span>
+            <div><div class="n">Acciones seguras</div><div class="s">PC y productos GEN+ desde una lista autorizada</div></div>
+            <span class="badge on">ACTIVO</span>
           </div>
-          <div class="card live">
-            <div><div class="n">Edificio en vivo <span class="vtag">v1.3</span></div><div class="s">Modela de 2 a 8 pisos por voz y verifica la norma sísmica</div></div>
-            <span class="badge on">EN STAND</span>
+          <div class="card" id="af-capability">
+            <div><div class="n">AgentFlow</div><div class="s">Correo y agentes remotos cuando están disponibles</div></div>
+            <span class="badge soon" id="af-capability-state">COMPROBANDO</span>
           </div>
-          <div class="card">
-            <div><div class="n">Gateway AgentFlow <span class="vtag">v1.0</span></div><div class="s">Orquesta agenda, Drive, Sheets, Ads y agentes remotos</div></div>
-            <span class="badge beta">BETA</span>
-          </div>
-
-          <div class="soon-h"><span>Conectores disponibles</span><span class="ln"></span></div>
-          <div class="row"><span class="dot"></span><span class="rn">Agenda y reuniones</span><span class="rs">Calendar</span></div>
-          <div class="row"><span class="dot"></span><span class="rn">Documentos y conocimiento</span><span class="rs">Drive</span></div>
-          <div class="row"><span class="dot"></span><span class="rn">Datos y CRM</span><span class="rs">Sheets</span></div>
-          <div class="row"><span class="dot"></span><span class="rn">Canales conversacionales</span><span class="rs">Gmail · WhatsApp</span></div>
         </div>
       </section>
       <div id="stand-stats">
@@ -606,7 +508,21 @@
       </section>
     </aside>
   </main>
-  <button id="rail-tgl" title="Mostrar / ocultar panel" aria-label="Panel lateral"><span class="chev">⟩</span></button>
+
+  <div class="telem">
+    <div class="l">
+      <span><span class="k">stt</span> <b id="t-stt">—</b></span>
+      <span><span class="k">llm</span> <b id="t-llm">—</b></span>
+      <span><span class="k">flow</span> <b id="t-flow">—</b></span>
+      <span><span class="k">tts</span> <b id="t-tts">—</b></span>
+      <span><span class="k">total</span> <b id="t-total">—</b></span>
+    </div>
+    <div class="r">
+      <span id="t-stack" class="k">—</span>
+      <span><span class="k">destino</span> <b id="t-to">—</b></span>
+      <span><span class="k">uptime</span> <b id="t-up">00:00</b></span>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -619,8 +535,7 @@
   .pill[data-s="executing"]{background:rgba(77,132,255,.30);color:#fff;box-shadow:0 0 16px rgba(77,132,255,.40)}
   .pill[data-s="waiting"]{background:rgba(255,196,77,.16);color:#ffe3ae}
   .node{transition:background .3s,border-color .3s,color .3s}
-  .node.on{animation:nodeGlow 1.3s ease-in-out infinite}
-  @keyframes nodeGlow{50%{box-shadow:0 0 10px rgba(77,132,255,.45);border-color:#8fb0ff}}
+  .node.on{box-shadow:0 0 10px rgba(77,132,255,.36);border-color:#8fb0ff}
   .exec{animation:execIn .34s cubic-bezier(.2,.9,.3,1.15)}
   @keyframes execIn{from{opacity:0;transform:translateX(14px)}}
   .tr{animation:trIn .3s ease-out}
@@ -631,10 +546,9 @@
   .btn-hablar{transition:transform .15s,box-shadow .3s}
   .btn-hablar:not(:disabled):hover{transform:translateY(-1px)}
   .btn-hablar:active:not(:disabled){transform:scale(.97)}
-  .btn-hablar:not(:disabled):not(.rec){animation:halo 3.4s ease-in-out infinite}
-  @keyframes halo{50%{box-shadow:0 0 18px rgba(77,132,255,.38)}}
-  .chip.up .led{animation:led 2.6s ease-in-out infinite}
-  @keyframes led{50%{box-shadow:0 0 6px rgba(35,194,127,.8)}}
+  .btn-hablar:not(:disabled):not(.rec){box-shadow:0 8px 24px rgba(255,107,43,.22)}
+  .chip.up .led{box-shadow:0 0 6px rgba(35,194,127,.55);animation:led 2.6s ease-in-out infinite}
+  @keyframes led{50%{opacity:.58}}
   #quizscore{position:absolute;left:50%;top:16%;transform:translateX(-50%);z-index:5;
     background:rgba(6,20,42,.92);border:1px solid rgba(77,132,255,.5);border-radius:14px;
     padding:14px 26px;text-align:center;pointer-events:none;
@@ -642,7 +556,7 @@
   #quizscore.out{animation:qsOut .5s ease forwards}
   #quizscore .n{font-size:34px;font-weight:800;color:#8fb0ff;line-height:1}
   #quizscore .l{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-top:4px}
-  @keyframes qsIn{from{opacity:0;transform:translateX(-50%) scale(.7)}}
+  @keyframes qsIn{from{opacity:0;transform:translateX(-50%) scale(.94)}}
   @keyframes qsOut{to{opacity:0;transform:translateX(-50%) translateY(-14px)}}
 
   /* ── Modo atraccion: gancho visible desde el pasillo ───────────────────── */
@@ -653,7 +567,7 @@
     letter-spacing:.3px;box-shadow:0 0 30px rgba(77,132,255,.35);pointer-events:none;white-space:nowrap}
   #attract-badge.on{display:flex;animation:atPulse 1.8s ease-in-out infinite}
   #attract-badge .wave{font-size:19px;animation:atWave 1.4s ease-in-out infinite}
-  @keyframes atPulse{50%{box-shadow:0 0 46px rgba(120,150,255,.6);border-color:rgba(150,180,255,.85)}}
+  @keyframes atPulse{50%{opacity:.84;transform:translateX(-50%) scale(.985)}}
   @keyframes atWave{25%{transform:rotate(18deg)}75%{transform:rotate(-12deg)}}
 
   /* ── Veredicto de derivas E.030 (panel sobre el escenario) ─────────────── */
@@ -679,7 +593,35 @@
   .exec .etabs-vista{display:block;width:100%;border-radius:8px;margin-top:8px;
     border:1px solid rgba(77,132,255,.35)}
 
-  /* ── Ajustes dark de componentes (16-jul; los tokens ya viven arriba) ──────── */
+  /* ── Tema DARK completo (16-jul, pedido de Emanuel): un solo lienzo navy ─────
+     El bloque claro (rail/header/footer) chocaba con el escenario. Se redefinen
+     los tokens; los estilos existentes los heredan sin tocar cada regla. */
+  :root{
+    --background:#040F20; --surface:#06142A; --surface-subtle:#0A1D3D; --surface-raised:#0A244C;
+    --border:rgba(122,168,255,.15); --border-strong:rgba(122,168,255,.34);
+    --text-primary:#EAF0FF; --text-secondary:#B9C7E4; --text-muted:#7E93BC;
+    --blue-ice:rgba(77,132,255,.14); --blue-pale:#8FB0FF; --blue-medium:#9DB9FF;
+    --focus-ring:rgba(109,149,255,.4);
+    --shadow-sm:0 2px 8px rgba(0,0,0,.35); --shadow-md:0 12px 28px rgba(0,0,0,.5);
+  }
+  @supports (color:oklch(0 0 0)){
+    :root{
+      --background:oklch(.14 .025 var(--brand-hue));
+      --surface:oklch(.18 .035 var(--brand-hue));
+      --surface-subtle:oklch(.23 .055 var(--brand-hue));
+      --surface-raised:oklch(.27 .065 var(--brand-hue));
+      --border:oklch(.76 .08 var(--brand-hue) / .16);
+      --border-strong:oklch(.76 .08 var(--brand-hue) / .34);
+      --text-primary:oklch(.96 .015 var(--brand-hue));
+      --text-secondary:oklch(.82 .035 var(--brand-hue));
+      --text-muted:oklch(.68 .055 var(--brand-hue));
+      --blue-primary:oklch(.62 .22 var(--brand-hue));
+      --blue-light:oklch(.69 .18 var(--brand-hue));
+      --blue-medium:oklch(.82 .10 var(--brand-hue));
+      --blue-pale:oklch(.79 .11 var(--brand-hue));
+      --cta:oklch(.70 .19 42); --cta-hover:oklch(.74 .19 42); --cta-press:oklch(.64 .19 42);
+    }
+  }
   .mic-btn:hover{background:rgba(77,132,255,.24)}
   .mic-item.sel .radio{box-shadow:inset 0 0 0 2.5px #0A244C}
   .mic-res.ok{border-color:rgba(35,194,127,.45);background:rgba(25,195,86,.12)}
@@ -732,8 +674,8 @@
   .chip.ram.crit .led{background:var(--danger);animation:led 1s ease-in-out infinite}
   .kbtn{cursor:pointer;font-family:var(--font-jakarta)}
   .kbtn:hover{background:rgba(77,132,255,.22)}
-  /* El rail original era un grid de 3 filas; con métricas y fotos son 5 */
-  .rail{grid-template-rows:auto auto auto minmax(0,1fr) minmax(0,1fr) !important}
+  /* Demo comercial: capacidades arriba y dos paneles operativos que comparten el alto. */
+  .rail{grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) !important}
   #stand-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;
     padding:10px 20px;border-top:1px solid var(--border)}
   .sstat{min-width:0;background:var(--surface-subtle);border:1px solid var(--border);
@@ -830,18 +772,75 @@
   #twin-toast b{color:#8FB0FF}
 
   /* ── Luces del stand: prender ilumina el escenario, apagar deja el orbe solo ── */
-  .stage{transition:background 1s ease}
+  .stage{transition:opacity 180ms cubic-bezier(.23,1,.32,1)}
   .stage.luces-on{background:radial-gradient(1100px 800px at 50% 38%,#12408f 0%,#0a2456 55%,#071633 100%)}
   .stage.luces-on .grid-bg{opacity:1}
   .stage.luces-on .estado,.stage.luces-on .hint-k{filter:brightness(1.25)}
   .stage.luces-off{background:radial-gradient(700px 500px at 50% 42%,#03102a 0%,#000208 70%)}
   .stage.luces-off .grid-bg{opacity:.12}
   .stage.luces-off .ejemplos,.stage.luces-off .hint-k,.stage.luces-off .pipe{opacity:.35}
+
+  @media (max-width:1400px) and (min-width:1001px){
+    #c-ws,#c-flow{display:none}.chips{gap:6px}.chip{padding-inline:8px}
+  }
+  @media (max-width:1000px){
+    body{height:auto;min-height:100svh;overflow:auto}
+    .app{width:100%;height:auto;min-height:100svh;grid-template-rows:auto auto;
+      grid-template-columns:minmax(0,1fr);overflow-x:hidden}
+    header{padding:12px 16px;align-items:flex-start;flex-wrap:wrap;gap:10px}
+    header,main,.telem{width:100%;min-width:0}
+    .brand{min-height:32px}.chips{width:100%;max-width:100%;min-width:0;overflow-x:auto;padding-bottom:4px}
+    .chip{min-width:44px;min-height:44px;padding-inline:12px}.app main{grid-template-columns:minmax(0,1fr)}
+    .stage{min-width:0;min-height:720px;padding-inline:16px}.rail{min-width:0;border-left:0;border-top:1px solid var(--border)}
+    .telem{padding:10px 16px;min-height:52px;flex-wrap:wrap;white-space:normal}
+    .telem .l,.telem .r{flex-wrap:wrap;gap:10px 16px}
+  }
+  @media (max-width:600px){
+    header{align-items:center;flex-wrap:nowrap;padding:10px 14px}
+    .brand{flex:none}.brand .mod{font-size:12px}
+    .chips{width:auto;margin-left:auto;overflow:visible;padding:0}
+    .chips>button,.chips>.chip:not(:first-child){display:none!important}
+    .stage{min-height:760px}.caption{padding-inline:8px}
+    canvas{width:min(82vw,360px);height:min(82vw,360px)}
+    .controles{width:100%;min-width:0}
+    .ejemplos{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:0}
+    .btn-ej{width:100%;height:auto;min-height:44px;padding:8px 10px;white-space:normal;line-height:1.25}.pipe{max-width:100%}.arrow{display:none}
+    .more-actions{width:100%;min-width:0}.extra-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}
+    .rail section{padding-inline:16px}.system-panel,.mic-panel{top:12px;right:12px;width:calc(100vw - 24px)}
+    #stand-stats{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-height:520px) and (min-width:1001px){
+    .app{grid-template-rows:48px minmax(0,1fr)}
+    header{padding-inline:16px;gap:12px}.brand img{height:20px}.brand .mod{font-size:10px}
+    .chip{height:26px;padding-inline:8px}
+    .stage{justify-content:flex-start;gap:4px;padding:4px 12px 3px;overflow:hidden}
+    canvas{width:88px;height:88px}
+    .controles{gap:4px;min-height:0;width:100%;max-width:100%;min-width:0}.btn-hablar{height:38px;padding-inline:20px;font-size:14px}
+    .ejemplos{width:100%;max-width:100%;display:flex;flex-wrap:nowrap;justify-content:center;gap:4px;
+      min-width:0;overflow-x:auto;overflow-y:hidden;padding:0 0 3px;scrollbar-width:thin}
+    .btn-ej{height:28px;padding-inline:10px;font-size:11px}.hint-k{display:none}
+    .more-actions summary{min-height:26px;padding-inline:9px}.more-actions[open]{position:absolute;z-index:20;
+      left:12px;right:12px;bottom:8px;width:auto}.more-actions[open] summary{background:#071b39}
+    .more-actions[open] .extra-actions{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto}
+    .node{height:26px;padding-inline:8px}.arrow{font-size:9px}
+    .caption{max-height:48px;overflow-y:auto;padding-inline:20px}
+    .agent{font-size:15px;line-height:20px;min-height:20px;margin-top:2px}.you{font-size:12px;line-height:17px;min-height:17px}
+    .stage:has(#you:not(:empty)) canvas,.stage:has(#agent:not(:empty)) canvas{display:none}
+    #attract-badge{display:none!important}
+    .rail{display:block;overflow-y:auto;overflow-x:hidden;min-height:0}.rail section{padding:10px 16px}
+  }
+  @media (hover:none),(pointer:coarse){
+    .btn-ej:hover:not(:disabled),.btn-hablar:not(:disabled):hover,#fotos-strip img:hover{transform:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+      scroll-behavior:auto!important;transition-duration:120ms!important}
+  }
 </style>
 <div id="inf-overlay">
   <div id="inf-modal">
     <div id="inf-head"><b>Informe estructural — GEN+_EDIFICIO</b><span id="inf-fecha"></span>
-      <button class="x" onclick="infCerrar()">✕</button></div>
+      <button class="x" onclick="infCerrar()" aria-label="Cerrar informe">✕</button></div>
     <div id="inf-tabs"></div>
     <div id="inf-grid"></div>
     <div id="inf-foot">
@@ -853,11 +852,10 @@
 </div>
 <div id="foto-big" onclick="this.classList.remove('open')"><img id="foto-big-img" alt="foto"></div>
 <div id="gestos-overlay">
-  <button id="gestos-cerrar" onclick="gestosOff()" title="Cerrar (Esc)">✕</button>
+  <button id="gestos-cerrar" onclick="gestosOff()" title="Cerrar (Esc)" aria-label="Cerrar experiencia 3D">✕</button>
   <div id="twin-toast"></div>
 </div>
 <script src="static/showcase.js"></script>
-<script src="static/vendor/xlsx.full.min.js"></script>
 <script src="static/orb.js"></script>
 <script>
   orb.mount(document.getElementById('orb'));
@@ -877,10 +875,15 @@
     $('c-stt').querySelector('b').textContent = i.stt_device;
     $('c-llm').querySelector('b').textContent = i.brain;
     $('c-tts').querySelector('b').textContent = i.tts_chip || 'Piper';
-    $('c-flow').querySelector('b').textContent = (i.agentflow_host || 'sin gateway').split(':')[0];
-    $('c-flow').classList.toggle('up', !!i.agentflow_agent);
-    $('c-flow').classList.toggle('down', !i.agentflow_agent);
+    $('c-flow').querySelector('b').textContent = i.agentflow_host.split(':')[0];
     ['c-stt','c-llm','c-tts'].forEach(c => $(c).classList.add('up'));  // locales: si corre, están
+    const afCard = $('af-capability'), afState = $('af-capability-state');
+    if (i.agentflow_host){
+      afCard.classList.add('live'); afState.className = 'badge on';
+      afState.textContent = i.agentflow_agent ? 'CONECTADO' : 'CORREO ACTIVO';
+    } else {
+      afState.textContent = 'OPCIONAL';
+    }
   }).catch(() => {});
 
   const t0 = Date.now();
@@ -909,7 +912,7 @@
     const e = box.querySelector('.empty'); if (e) e.remove();
     const d = document.createElement('div');
     d.className = 'tr ' + quien;
-    d.innerHTML = '<span class="q">' + (quien === 'u' ? 'VISITANTE' : 'GENBOT') + ' · ' + hora() + '</span>'
+    d.innerHTML = '<span class="q">' + (quien === 'u' ? 'VISITANTE' : 'GENIE') + ' · ' + hora() + '</span>'
                 + esc(texto);
     box.prepend(d);
     while (box.children.length > 20) box.lastChild.remove();  // en feria esto crece toda la tarde
@@ -945,6 +948,12 @@
   }
 
   $hablar.onclick = () => enviar({cmd:'listen'});
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.repeat || document.activeElement !== document.body) return;
+    if ($em.classList.contains('open') || $pl.classList.contains('open') || $system.classList.contains('open')) return;
+    e.preventDefault();
+    $hablar.click();
+  });
 
   document.querySelectorAll('.btn-ej').forEach(b => {
     b.onclick = () => {
@@ -968,15 +977,18 @@
       $list.innerHTML = '';
       if (!r.mics.length){ $list.innerHTML = '<div class="empty">Sin micrófonos de entrada.</div>'; return; }
       r.mics.forEach(m => {
-        const d = document.createElement('div');
+        const d = document.createElement('button');
+        d.type = 'button';
         d.className = 'mic-item' + (m.current ? ' sel' : '');
+        d.setAttribute('aria-pressed', m.current ? 'true' : 'false');
         d.innerHTML = '<span class="radio"></span><span>' + esc(m.name) + '</span>'
                     + '<span class="api">' + esc(m.api) + '</span>';
         d.onclick = async () => {
           const rr = await fetch('/api/mic', {method:'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({device: m.id})}).then(x => x.json());
-          if (rr.ok){ [...$list.children].forEach(x => x.classList.remove('sel')); d.classList.add('sel');
+          if (rr.ok){ [...$list.children].forEach(x => { x.classList.remove('sel'); x.setAttribute('aria-pressed','false'); });
+            d.classList.add('sel'); d.setAttribute('aria-pressed','true');
             $res.className = 'mic-res show';
             $res.innerHTML = 'Elegido: <b>' + esc(rr.name) + '</b>. Pulsa <b>Probar</b> y habla.'; }
         };
@@ -1004,6 +1016,57 @@
     }
     b.disabled = false; b.textContent = 'Probar — habla al pulsarlo';
   };
+
+  // ── Preflight operativo: hardware, modelos y conexiones en un solo lugar ───
+  const $system = $('system-panel'), $sysChecks = $('sys-checks'), $sysSummary = $('sys-summary');
+
+  function systemToggle(open){
+    $system.classList.toggle('open', open);
+    $system.setAttribute('aria-hidden', open ? 'false' : 'true');
+    $('btn-system').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) $('system-close').focus();
+  }
+
+  async function systemRefresh(deep=false){
+    const button = $('sys-refresh');
+    button.disabled = true; button.textContent = deep ? 'Probando hardware…' : 'Comprobando…';
+    $sysSummary.textContent = 'Comprobando equipo y conexiones…';
+    try{
+      const data = await fetch('/api/preflight?' + new URLSearchParams({refresh:'1',deep:deep?'1':'0'})).then(r => r.json());
+      const summary = data.summary || {ok:0,warn:0,error:1};
+      const label = data.mode === 'ready' ? 'Listo para el stand'
+        : data.mode === 'preview' ? 'Demo web verificada'
+        : data.mode === 'degraded' ? 'Listo con funciones opcionales limitadas'
+        : 'Hay requisitos obligatorios pendientes';
+      $sysSummary.textContent = `${label} · ${summary.ok} OK · ${summary.warn} avisos · ${summary.error} errores`;
+      $sysChecks.innerHTML = (data.checks || []).map(c =>
+        `<div class="sys-row ${esc(c.status)}"><span class="dot"></span><div>`
+        + `<b>${esc(c.label)}</b><p>${esc(c.detail)}</p>`
+        + (c.status !== 'ok' && c.action ? `<small>${esc(c.action)}</small>` : '') + `</div></div>`).join('')
+        || '<div class="empty">No se recibió diagnóstico.</div>';
+      const chip = $('btn-system'); chip.classList.remove('up','warn','down');
+      chip.classList.add(data.ready ? 'up' : 'down');
+      $('sys-ready').textContent = data.ready ? 'LISTO' : `${summary.error} ERROR`;
+      const byId = Object.fromEntries((data.checks || []).map(c => [c.id,c]));
+      [['c-stt','whisper'],['c-llm','model'],['c-tts','voice'],['c-flow','agentflow']].forEach(([chipId,checkId]) => {
+        const el = $(chipId), check = byId[checkId]; if (!el || !check) return;
+        el.classList.remove('up','warn','down');
+        el.classList.add(check.status === 'ok' ? 'up' : check.status === 'warn' ? 'warn' : 'down');
+      });
+    }catch(error){
+      $('btn-system').classList.remove('up','warn'); $('btn-system').classList.add('down');
+      $('sys-ready').textContent = 'SIN DATOS';
+      $sysSummary.textContent = 'No se pudo consultar el diagnóstico local.';
+      $sysChecks.innerHTML = '<div class="sys-row error"><span class="dot"></span><div><b>Preflight</b><p>' + esc(error) + '</p></div></div>';
+    }finally{
+      button.disabled = false; button.textContent = 'Volver a comprobar hardware';
+    }
+  }
+
+  $('btn-system').onclick = () => { const open = !$system.classList.contains('open'); systemToggle(open); if (open) systemRefresh(false); };
+  $('system-close').onclick = () => systemToggle(false);
+  $('sys-refresh').onclick = () => systemRefresh(true);
+  systemRefresh(false);
 
   // ── Popup de correo ─────────────────────────────────────────────────────────
   const $em = $('em-modal'), $emIn = $('em-input'), $emErr = $('em-err');
@@ -1068,6 +1131,8 @@
   });
   addEventListener('keydown', e => {
     if (e.key === 'Escape' && $em.classList.contains('open')) emCancelar();
+    if (e.key === 'Escape' && $system.classList.contains('open')) systemToggle(false);
+    if (e.key === 'Escape' && $panel.classList.contains('open')) $panel.classList.remove('open');
   });
 
   // ── WebSocket ───────────────────────────────────────────────────────────────
@@ -1083,7 +1148,7 @@
       if (m.type === 'level'){ orb.setState('listening', m.level); pipeOn('mic'); return; }
       if (m.type === 'speak'){
         orb.playEnvelope(m.env, m.fps);
-        // Kore = frase del catálogo pre-renderizada · Piper = improvisada (se oye distinta)
+        // La etiqueta identifica la voz activa sin exponer detalles innecesarios en la vista principal.
         if (m.voz) $('voz').innerHTML =
           `<span class="voz-tag ${m.voz === 'piper' ? 'piper' : ''}">${m.voz.toUpperCase()}</span>`;
         return;
@@ -1158,8 +1223,8 @@
       if (m.type === 'agentflow'){
         if (m.phase === 'start'){
           pipeOn('flow');
-          window.__afCard = addExec('<div class="top"><span class="who">GenBOT · AgentFlow</span><span class="t">' + hora() + '</span></div>'
-            + '<div class="subj">Centro de Operaciones · memoria + herramientas</div><div class="st wait js-af">· consultando…</div>');
+          window.__afCard = addExec('<div class="top"><span class="who">Genie · AgentFlow</span><span class="t">' + hora() + '</span></div>'
+            + '<div class="subj">Centro de Operaciones · agentes y herramientas</div><div class="st wait js-af">· consultando…</div>');
         } else {
           const st = window.__afCard && window.__afCard.querySelector('.js-af');
           if (st){
@@ -1172,14 +1237,14 @@
         }
       }
       if (m.type === 'pc_action'){
-        addExec('<div class="top"><span class="who">GenBOT · PC local</span><span class="t">' + hora() + '</span></div>'
+        addExec('<div class="top"><span class="who">Genie · PC local</span><span class="t">' + hora() + '</span></div>'
           + '<div class="subj">' + esc(m.action || 'acción') + '</div><div class="st ' + (m.ok ? 'ok' : 'bad') + '">'
           + (m.ok ? '✓ ejecutada desde la lista permitida' : '✕ no ejecutada') + '</div>');
       }
       if (m.type === 'app_open'){
-        addExec('<div class="top"><span class="who">GenBOT · Ecosistema</span><span class="t">' + hora() + '</span></div>'
+        addExec('<div class="top"><span class="who">Genie · Ecosistema</span><span class="t">' + hora() + '</span></div>'
           + '<div class="subj">' + esc(m.label || 'aplicación') + '</div><div class="st ' + (m.ok ? 'ok' : 'bad') + '">'
-          + (m.ok ? '✓ disponible en el catálogo' : '✕ no disponible') + '</div>');
+          + (m.ok ? '✓ abierta desde el catálogo autorizado' : '✕ no se pudo abrir') + '</div>');
       }
       if (m.type === 'exec'){
         pipeOn('flow');
@@ -1402,6 +1467,20 @@
 
   function infNum(v){ const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? v : n; }
 
+  let xlsxLoader = null;
+  function cargarSheetJs(){
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (xlsxLoader) return xlsxLoader;
+    xlsxLoader = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'static/vendor/xlsx.full.min.js';
+      script.onload = () => resolve(window.XLSX);
+      script.onerror = () => reject(new Error('No se pudo cargar el exportador Excel.'));
+      document.head.appendChild(script);
+    });
+    return xlsxLoader;
+  }
+
   async function infExportXlsx(){
     if (!INF) return;
     const b = $('inf-xlsx'); b.disabled = true; b.textContent = 'Generando…';
@@ -1419,6 +1498,7 @@
       }
       throw new Error('server xlsx no disponible');
     }catch(e){
+      await cargarSheetJs();
       const wb = XLSX.utils.book_new();
       INF.hojas.forEach(h => {
         const aoa = [h.headers, ...h.filas.map(f => f.map(infNum))];
@@ -1628,292 +1708,5 @@
     } finally { b.disabled = false; b.textContent = 'Exportar PDF'; }
   }
 </script>
-
-<style>
-  /* ═══ v4 UX (17-jul): HUD tech + paneles desplegables — capa ADITIVA ═══════ */
-
-  /* Brackets HUD en las esquinas del escenario: firma tecnológica sobria */
-  .stage::before{content:"";position:absolute;inset:14px;pointer-events:none;opacity:.4;
-    background:
-      linear-gradient(var(--blue-light),var(--blue-light)) left 0 top 0/20px 1px,
-      linear-gradient(var(--blue-light),var(--blue-light)) left 0 top 0/1px 20px,
-      linear-gradient(var(--blue-light),var(--blue-light)) right 0 top 0/20px 1px,
-      linear-gradient(var(--blue-light),var(--blue-light)) right 0 top 0/1px 20px,
-      linear-gradient(var(--blue-light),var(--blue-light)) left 0 bottom 0/20px 1px,
-      linear-gradient(var(--blue-light),var(--blue-light)) left 0 bottom 0/1px 20px,
-      linear-gradient(var(--blue-light),var(--blue-light)) right 0 bottom 0/20px 1px,
-      linear-gradient(var(--blue-light),var(--blue-light)) right 0 bottom 0/1px 20px;
-    background-repeat:no-repeat}
-
-  /* Rail con secciones desplegables (chevron en cada título) */
-  .rail{display:flex !important;flex-direction:column}
-  .rail section{flex:none;display:flex;flex-direction:column;min-height:0}
-  .rail section.grow{flex:1}
-  .rail section.closed{flex:none !important}
-  .rail section.closed > :not(h2){display:none !important}
-  .rail section:first-of-type .scroll{max-height:32vh}
-  h2.cap.tgl{cursor:pointer;display:flex;align-items:center;user-select:none;
-    transition:color 160ms ease}
-  h2.cap.tgl:hover{color:var(--blue-pale)}
-  .tgl .chev{margin-left:auto;font-size:10px;color:var(--text-muted);
-    transition:transform 200ms ease}
-  section.closed .tgl .chev{transform:rotate(-90deg)}
-</style>
-<script>
-  /* v4 UX: panel Sistema + secciones desplegables (capa aditiva, no toca el core) */
-  (function () {
-    var sys = document.getElementById('sys-panel');
-    var btn = document.getElementById('btn-sys');
-    if (btn && sys) {
-      btn.onclick = function () { sys.classList.toggle('open'); };
-      var x = document.getElementById('sys-close');
-      if (x) x.onclick = function () { sys.classList.remove('open'); };
-    }
-    document.querySelectorAll('.rail section').forEach(function (sec) {
-      var h = sec.querySelector('h2.cap');
-      if (!h) return;
-      if (sec.querySelector('#tr') || sec.querySelector('#execs')) sec.classList.add('grow');
-      h.classList.add('tgl');
-      var c = document.createElement('span');
-      c.className = 'chev'; c.textContent = '▾';
-      h.appendChild(c);
-      h.addEventListener('click', function () { sec.classList.toggle('closed'); });
-    });
-  })();
-</script>
-
-<style>
-  /* ═══ v5 UX (17-jul): minimal + orbe protagonista — capa ADITIVA ══════════════
-     Los 17 botones ya no compiten con el orbe: filtros por categoría (uno a la vez),
-     el panel derecho se esconde con un botón, y el orbe gana aros HUD reactivos. */
-  :root{--rail-w:372px}
-
-  /* El orbe crece: es el protagonista (orb.js re-rasteriza vía ResizeObserver) */
-  canvas#orb{width:min(50vmin,470px);height:min(50vmin,470px)}
-
-  /* ── Filtros de acciones: segmented control, solo la categoría activa ──────── */
-  .ej-tabs{display:inline-flex;gap:2px;padding:3px;border-radius:var(--radius-full);
-    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
-  .ej-tab{height:28px;padding:0 13px;border:none;border-radius:var(--radius-full);cursor:pointer;
-    font:600 11.5px var(--font-jakarta);letter-spacing:.02em;color:rgba(255,255,255,.6);
-    background:transparent;transition:color 160ms ease,background-color 160ms ease}
-  .ej-tab:hover{color:#fff}
-  .ej-tab:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring)}
-  .ej-tab.on{background:var(--gradient-cta);color:#fff;box-shadow:0 0 14px rgba(59,110,255,.3)}
-  .ej-panel{display:none;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
-  .ej-panel.on{display:flex;animation:panelIn 240ms cubic-bezier(.2,.9,.3,1)}
-  @keyframes panelIn{from{opacity:0;transform:translateY(4px)}}
-  .btn-app{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;
-    border-radius:var(--radius-sm);text-decoration:none;font:500 12px var(--font-jakarta);
-    background:rgba(255,255,255,.07);color:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.16);
-    transition:background-color .2s,border-color .2s,color .2s,transform .15s}
-  .btn-app:hover{background:rgba(77,132,255,.18);border-color:rgba(77,132,255,.45);color:#fff;transform:translateY(-1px)}
-  .btn-app .ext{font-size:10px;color:var(--blue-pale);opacity:.8}
-
-  /* Pipeline: casi invisible en reposo, despierta cuando el agente trabaja */
-  .pipe{opacity:.42;transition:opacity .5s ease}
-  .pipe:has(.node.on),.pipe:has(.node.done){opacity:1}
-
-  /* ── Panel derecho: esconder / abrir con un botón en el borde ──────────────── */
-  main{transition:grid-template-columns 360ms cubic-bezier(.2,.9,.3,1)}
-  .rail{overflow-y:auto;overflow-x:hidden;min-width:0;overscroll-behavior:contain;scrollbar-gutter:stable}
-  .rail section.grow{flex:1 0 150px}
-  body.rail-off main{grid-template-columns:1fr 0px}
-  body.rail-off .rail{border-left-color:transparent}
-  #rail-tgl{position:fixed;top:50%;right:var(--rail-w);transform:translateY(-50%);z-index:30;
-    width:20px;height:64px;border:1px solid var(--border);border-right:none;
-    border-radius:8px 0 0 8px;cursor:pointer;color:var(--text-muted);
-    background:rgba(6,20,42,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    display:flex;align-items:center;justify-content:center;padding:0;
-    transition:right 360ms cubic-bezier(.2,.9,.3,1),color 160ms ease,background-color 160ms ease}
-  #rail-tgl:hover{color:#fff;background:rgba(77,132,255,.25)}
-  #rail-tgl:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring)}
-  #rail-tgl .chev{font-size:11px;line-height:1;transition:transform 360ms ease}
-  body.rail-off #rail-tgl{right:0}
-  body.rail-off #rail-tgl .chev{transform:rotate(180deg)}
-
-  /* ── Orbe: halo que respira + aro de ticks + arco cometa + órbita con satélites ─ */
-  .orb-shell{position:relative;flex:none;display:grid;place-items:center}
-  .orb-shell > *{grid-area:1/1}
-  .orb-halo,.orb-ring,.orb-pulse{pointer-events:none;border-radius:50%;aspect-ratio:1}
-  .orb-halo{width:128%;
-    background:radial-gradient(circle,rgba(33,101,255,.15) 0%,rgba(33,101,255,.05) 45%,transparent 68%);
-    animation:haloB 6.5s ease-in-out infinite}
-  @keyframes haloB{50%{opacity:.55;transform:scale(1.05)}}
-  .orb-ring{opacity:.5;transition:opacity .6s ease,filter .6s ease}
-  .orb-ring.r1{width:103%;
-    background:repeating-conic-gradient(rgba(122,168,255,.55) 0deg .7deg,transparent .7deg 6deg);
-    -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
-            mask:radial-gradient(closest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
-    animation:spin 90s linear infinite}
-  .orb-ring.r2{width:111%;
-    background:conic-gradient(from 210deg,transparent 0 290deg,rgba(77,132,255,.04) 298deg,
-      rgba(77,132,255,.75) 342deg,#BACFFF 357deg,transparent 360deg);
-    -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 1.5px));
-            mask:radial-gradient(closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 1.5px));
-    animation:spin 14s linear infinite}
-  .orb-ring.r3{width:120%;border:1px solid rgba(122,168,255,.14);position:relative;
-    animation:spin 46s linear infinite reverse}
-  .orb-ring.r3::before,.orb-ring.r3::after{content:"";position:absolute;border-radius:50%;
-    background:#8FB0FF;box-shadow:0 0 10px rgba(143,176,255,.9)}
-  .orb-ring.r3::before{width:5px;height:5px;top:-3px;left:50%;margin-left:-2.5px}
-  .orb-ring.r3::after{width:3px;height:3px;bottom:6%;right:6%;opacity:.7}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  /* Pulso que emana del orbe mientras habla o ejecuta */
-  .orb-pulse{width:100%;border:1.5px solid rgba(109,149,255,.55);opacity:0}
-  .stage:has(#pill[data-s="speaking"]) .orb-pulse,
-  .stage:has(#pill[data-s="executing"]) .orb-pulse{animation:orbPulse 1.6s ease-out infinite}
-  @keyframes orbPulse{0%{opacity:.65;transform:scale(.98)}100%{opacity:0;transform:scale(1.22)}}
-  /* Los aros despiertan con el agente (sin reiniciar el giro: solo luz) */
-  .stage:has(#pill[data-s="listening"]) .orb-ring,
-  .stage:has(#pill[data-s="transcribing"]) .orb-ring,
-  .stage:has(#pill[data-s="thinking"]) .orb-ring,
-  .stage:has(#pill[data-s="speaking"]) .orb-ring,
-  .stage:has(#pill[data-s="executing"]) .orb-ring{opacity:.95;filter:brightness(1.35)}
-
-  /* ── Detalles sutiles en toda la página ────────────────────────────────────── */
-  /* Barrido de luz vertical, apenas perceptible */
-  .scan{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .scan::before{content:"";position:absolute;left:0;right:0;top:0;height:140px;
-    background:linear-gradient(180deg,transparent,rgba(77,132,255,.045) 50%,transparent);
-    transform:translateY(-160px);animation:scanY 15s linear infinite}
-  @keyframes scanY{to{transform:translateY(110vh)}}
-  /* El hairline de marca del header respira lentamente */
-  header::after{background-size:220% 100%;animation:hairShift 22s linear infinite}
-  @keyframes hairShift{to{background-position:-220% 0}}
-  /* Chips del header con lift al pasar */
-  .chip{transition:background-color 160ms ease,color 160ms ease,transform 160ms ease,border-color 160ms ease}
-  .kbtn:hover,.mic-btn:hover{transform:translateY(-1px)}
-  /* Tick de marca en los títulos del panel */
-  h2.cap.tgl::before{content:"";width:3px;height:10px;border-radius:2px;
-    background:var(--gradient-cta);margin-right:8px;flex:none;opacity:.85}
-  /* Métricas del stand con vida */
-  .sstat{transition:border-color 200ms ease,transform 200ms ease}
-  .sstat:hover{border-color:rgba(77,132,255,.4);transform:translateY(-1px)}
-  /* El badge EN VIVO respira */
-  .badge.on{box-shadow:0 0 12px rgba(33,101,255,.28);animation:badgeGlow 3.2s ease-in-out infinite}
-  @keyframes badgeGlow{50%{box-shadow:0 0 18px rgba(33,101,255,.45)}}
-
-  button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{
-    outline:2px solid var(--blue-light);outline-offset:3px
-  }
-  html[data-theme="light"] .rail{background:var(--surface)}
-  html[data-theme="light"] #rail-tgl{background:rgba(255,255,255,.9)}
-  html[data-theme="light"] .mic-btn:hover{background:var(--surface-raised)}
-
-  @media (max-height:760px) and (min-width:901px){
-    .stage{justify-content:flex-start;gap:8px;padding:10px 18px 14px}
-    canvas#orb{width:min(34vh,280px);height:min(34vh,280px)}
-    .caption{padding:0 24px}.agent{font-size:17px;line-height:23px}.you{font-size:13px;line-height:19px}
-    .btn-hablar{height:42px;font-size:14px}.controles{gap:7px}
-    .rail section{padding-top:12px;padding-bottom:12px}
-    .rail section:first-of-type .scroll{max-height:none}
-  }
-
-  @media (max-height:520px) and (min-width:901px){
-    canvas#orb{width:min(28vh,180px);height:min(28vh,180px)}
-    .stage{gap:6px;padding-top:8px}.pipe{padding-bottom:4px}
-    .ej-tab{height:26px;padding:0 10px}.btn-ej,.btn-app{height:30px}
-  }
-
-  @media (max-width:900px){
-    body{height:auto;min-height:100svh;overflow-y:auto;overflow-x:hidden}
-    .app{height:auto;min-height:100svh;grid-template-rows:auto 1fr}
-    header,main,.stage,.rail{width:100%;max-width:100vw;min-width:0}
-    header{min-height:64px;padding:10px 14px;gap:10px;flex-wrap:wrap}
-    .chips{gap:6px;width:100%;max-width:calc(100vw - 28px);min-width:0;overflow-x:auto;padding-bottom:2px}
-    main,body.rail-off main{display:block}
-    .stage{min-height:calc(100svh - 64px);padding:54px 14px 22px;overflow:visible;scrollbar-gutter:auto}
-    canvas#orb{width:min(76vw,430px);height:min(76vw,430px)}
-    .ejemplos{max-width:100%;overflow-x:auto;justify-content:flex-start}
-    .ej-tabs{min-width:max-content;align-self:flex-start}
-    .ej-panel{align-self:stretch}
-    .rail{border-left:0;border-top:1px solid var(--border);max-height:none;overflow:visible;scrollbar-gutter:auto}
-    .rail section:first-of-type .scroll{max-height:none}
-    #rail-tgl{display:none}
-    .sys-panel,.mic-panel{top:72px;left:12px;right:12px;width:auto;max-height:78svh;overflow:auto}
-  }
-  @media (max-width:600px){
-    .brand{gap:8px}.brand .net,.theme-label{display:none}.brand img{height:19px}
-    header .chip{min-width:44px;min-height:44px;justify-content:center;padding:0 10px}
-    #btn-limpiar{font-size:0}#btn-limpiar::after{content:'↻';font-size:18px}
-    .stage{gap:12px}.estado{top:14px;left:14px}
-    .caption{padding:0 8px}.agent{font-size:17px;line-height:24px}
-    .btn-hablar{min-height:52px;min-width:170px}
-    .ej-tab,.btn-ej,.btn-app{min-height:44px}
-    .pipe{max-width:100%;overflow-x:auto;justify-content:flex-start;padding-bottom:4px}
-    #derivas-card,#norma-card,#gemma-card,#clima-card{max-width:calc(100vw - 24px);min-width:0}
-  }
-
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;
-      animation-iteration-count:1!important;transition-duration:.01ms!important}
-  }
-</style>
-<script>
-  /* v5 UX: filtros de acciones + panel derecho ocultable (capa aditiva) */
-  (function () {
-    var tabs = document.querySelectorAll('.ej-tab');
-    var panels = document.querySelectorAll('.ej-panel');
-    tabs.forEach(function (t, index) {
-      t.setAttribute('role', 'tab');
-      t.setAttribute('aria-selected', t.classList.contains('on') ? 'true' : 'false');
-      t.tabIndex = t.classList.contains('on') ? 0 : -1;
-      if (!t.id) t.id = 'ej-tab-' + index;
-      var panel = document.querySelector('.ej-panel[data-cat="' + t.dataset.cat + '"]');
-      if (panel) {
-        panel.setAttribute('role', 'tabpanel');
-        panel.setAttribute('aria-labelledby', t.id);
-      }
-    });
-    function selectTab(t) {
-      tabs.forEach(function (x) {
-        var active = x === t;
-        x.classList.toggle('on', active);
-        x.setAttribute('aria-selected', active ? 'true' : 'false');
-        x.tabIndex = active ? 0 : -1;
-      });
-      panels.forEach(function (p) {
-        var active = p.dataset.cat === t.dataset.cat;
-        p.classList.toggle('on', active);
-        p.hidden = !active;
-      });
-    }
-    tabs.forEach(function (t) {
-      t.addEventListener('click', function () {
-        selectTab(t);
-      });
-      t.addEventListener('keydown', function (event) {
-        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Home' && event.key !== 'End') return;
-        event.preventDefault();
-        var list = Array.from(tabs);
-        var next = event.key === 'Home' ? 0 : event.key === 'End' ? list.length - 1
-          : (list.indexOf(t) + (event.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
-        selectTab(list[next]);
-        list[next].focus();
-      });
-    });
-    panels.forEach(function (p) { p.hidden = !p.classList.contains('on'); });
-    var tgl = document.getElementById('rail-tgl');
-    if (tgl) tgl.onclick = function () { document.body.classList.toggle('rail-off'); };
-    var themeBtn = document.getElementById('btn-theme');
-    function themeLabel(){
-      if (!themeBtn) return;
-      var next = document.documentElement.dataset.theme === 'dark' ? 'claro' : 'oscuro';
-      themeBtn.setAttribute('aria-label','Cambiar a tema ' + next);
-      themeBtn.title = 'Cambiar a tema ' + next;
-    }
-    themeLabel();
-    if (themeBtn) themeBtn.onclick = function () {
-      document.documentElement.classList.add('theme-transition-off');
-      var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      localStorage.setItem('genbot-theme', next);
-      themeLabel();
-      requestAnimationFrame(function(){requestAnimationFrame(function(){
-        document.documentElement.classList.remove('theme-transition-off');
-      });});
-    };
-  })();
-</script>
+</body>
 </html>

@@ -19,11 +19,11 @@
     error:     { spin: 0.14, tilt: 0.06, turb: 0.30, radius: 0.96, hueA: 350, hueB: 20,  fade: 0.30, tw: 0.8 },
   };
 
-  let cv, ctx, pts = [], N = 3000, dpr = 1;
+  let cv, ctx, pts = [], N = 900, dpr = 1;
   let state = "idle", target = STATES.idle, cur = Object.assign({}, STATES.idle);
   let level = 0, levelGoal = 0, t = 0, tx = 0, pulse = -1, burst = -1, raf = null;
   let env = null, envFps = 25, envStart = 0;
-  let slowFrames = 0, lastT = 0, ripples = [], lastRipple = 0;
+  let slowFrames = 0, lastT = 0, lastDraw = 0, ripples = [], lastRipple = 0;
   // v3: cometas orbitales, sacudida en error y estrella fugaz en reposo
   let comets = [], shake = 0, star = null, nextStar = 0;
   // v4: efectos (desintegrar/armar) + paleta comandada por voz
@@ -75,7 +75,7 @@
   }
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     const w = Math.round(cv.clientWidth), h = Math.round(cv.clientHeight);
     if (!w || !h) return false;
     cv.width = w * dpr;
@@ -85,6 +85,8 @@
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
+    if (document.hidden || now - lastDraw < 32) return;
+    lastDraw = now;
     if (!cv.width || !cv.height) { resize(); return; }
     const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 0.016;
     lastT = now;
@@ -307,6 +309,7 @@
     mount: function (canvas) {
       cv = canvas;
       ctx = cv.getContext("2d");
+      N = window.matchMedia("(max-width: 600px)").matches ? 520 : 900;
       build(N);
       comets = Array.from({ length: 8 }, () => ({
         a: Math.random() * 6.283, sp: 0.55 + Math.random() * 0.9,

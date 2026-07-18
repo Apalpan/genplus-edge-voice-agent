@@ -84,11 +84,11 @@
     }
 
     if (/agent ?flow|agenda|centro de operaciones|publicidad/.test(t)) {
-      emit("agentflow", { phase: "start", agent: "Genbot Voice Gateway" }, "thinking");
+      emit("agentflow", { phase: "start", agent: "GenBOT Voice Gateway" }, "thinking");
       await sleep(900);
       emit("metric", { stage: "flow", ms: 870 });
       emit("agentflow", { phase: "done", agent: "operations", run_id: "preview" }, "speaking");
-      return agentSay("Genbot puede consultar calendario, reuniones, contactos y reportes mediante AgentFlow. Esta página lo simula; la ejecución real corre desde la computadora autorizada.");
+      return agentSay("GenBOT puede consultar calendario, reuniones, contactos y reportes mediante AgentFlow. Esta página lo simula; la ejecución real corre desde la computadora autorizada.");
     }
     if (/controla.*pc|controlar.*pc|abre.*calculadora|computadora/.test(t)) {
       emit("pc_action", { ok: true, action: "vista previa" }, "executing");
@@ -107,7 +107,7 @@
     }
     if (/internet|conectado/.test(t)) {
       emit("metric", { stage: "router", ms: 2 });
-      return agentSay("Whisper y Gemma 4 corren localmente. AgentFlow se usa solo cuando Genbot necesita consultar servicios y agentes remotos.");
+      return agentSay("Whisper y Gemma 4 corren localmente. AgentFlow se usa solo cuando GenBOT necesita consultar servicios y agentes remotos.");
     }
     if (/foto/.test(t)) {
       await agentSay("¡Sonríe! Tres, dos, uno.", "executing");
@@ -172,7 +172,7 @@
       return agentSay("¿Qué tal este?");
     }
     if (/hola|quien eres/.test(t)) {
-      return agentSay("Hola, soy Genbot, el agente de voz de gen+. Escucho con Whisper, razono con Gemma 4 y conecto herramientas mediante AgentFlow.");
+      return agentSay("Hola, soy GenBOT, el agente de voz de gen+. Escucho con Whisper, razono con Gemma 4 y conecto herramientas mediante AgentFlow.");
     }
     if (/adios|chau|gracias/.test(t)) return agentSay("¡Gracias por visitarnos! Pasa por el stand de gen+ y llévate tu diagnóstico.");
     emit("metric", { stage: "llm", ms: 900 + Math.round(Math.random() * 600) });
@@ -209,7 +209,7 @@
       setTimeout(() => {
         if (this.onopen) this.onopen();
         emit("status", {}, "idle");
-        setTimeout(() => agentSay("Hola, soy Genbot. Esta es la vista previa web: toca un ejemplo para probar el flujo."), 1400);
+        setTimeout(() => agentSay("Hola, soy GenBOT. Esta es la vista previa web: toca un ejemplo para probar el flujo."), 1400);
         armIdle();
       }, 300);
     }
@@ -268,7 +268,7 @@
   window.fetch = function (url, opts) {
     const u = String(url);
     const json = (obj) => Promise.resolve(new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } }));
-    if (u.includes("/api/info")) return json({ assistant: "Genbot", stt: "faster-whisper small", stt_device: "CUDA", brain: "gemma4:latest", tts: "Iapetus + Piper", tts_chip: "Iapetus", agentflow_host: "AgentFlow", agentflow_agent: true, to: "coordinación gen+" });
+    if (u.includes("/api/info")) return json({ assistant: "GenBOT", stt: "faster-whisper small", stt_device: "CUDA", brain: "gemma4:latest", tts: "Iapetus + Piper", tts_chip: "Iapetus", agentflow_host: "AgentFlow", agentflow_agent: true, to: "coordinación gen+" });
     if (u.includes("/api/stats")) return json(stats);
     if (u.includes("/api/salud")) return json({ ram_libre_gb: 9.4, ram_total_gb: 32 });
     if (u.includes("/api/mics")) return json({ mics: [{ id: 0, name: "Micrófono del stand (demo)", api: "WASAPI", current: true }] });
